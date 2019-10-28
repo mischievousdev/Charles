@@ -15,6 +15,10 @@ from utils import default, jsonedit
 from contextlib import redirect_stdout # Eval
 from utils.default import commandExtra, groupExtra
 
+from jishaku.exception_handling import ReplResponseReactor
+from jishaku.paginators import PaginatorInterface, WrappedPaginator
+from jishaku.shell import ShellReader
+
 
 class Owner(commands.Cog, name="Owner", command_attrs=dict(hidden=True)):
     def __init__(self, bot):
@@ -70,6 +74,32 @@ class Owner(commands.Cog, name="Owner", command_attrs=dict(hidden=True)):
 
         # remove `foo`
         return content.strip('` \n')
+
+    @commandExtra(category="Other", name='git')
+    async def jsk_git(self, ctx: commands.Context, pull_push, *, commit_msg=None):
+        """
+        Executes statements in the system shell.
+
+        This uses the system shell as defined in $SHELL, or `/bin/bash` otherwise.
+        Execution can be cancelled by closing the paginator.
+        """
+
+        async with ReplResponseReactor(ctx.message):
+            paginator = WrappedPaginator(prefix="```sh", max_size=1985)
+            paginator.add_line(f"$ git {pull_push}\n")
+
+            interface = PaginatorInterface(ctx.bot, paginator, owner=ctx.author)
+            self.bot.loop.create_task(interface.send_to(ctx))
+
+            if commit_msg is None:
+                commit_msg = "File changes"
+            with ShellReader(f'sudo git add .&&sudo git commit -m "{commit_msg}"&&sudo git {pull_push}') as reader:
+                async for line in reader:
+                    if interface.closed:
+                        return
+                    await interface.add_line(line)
+
+                await interface.add_line(f"\n[status] Return code {reader.close_code}")
 
     @commandExtra(category="Other")
     async def setnews(self, ctx, m_id:int, *, news:str):
