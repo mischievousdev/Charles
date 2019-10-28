@@ -7,7 +7,6 @@ import math
 import humanize
 import copy # sudo
 import aiohttp
-import inspect # source
 
 from discord.ext import commands
 from typing import Union
@@ -52,19 +51,6 @@ class Owner(commands.Cog, name="Owner", command_attrs=dict(hidden=True)):
             except FileNotFoundError:
                 self.bot.embed_color = 0xFE8000
                 return True
-
-    def paginate(text: str):
-        '''Simple generator that paginates text.'''
-        last = 0
-        pages = []
-        for curr in range(0, len(text)):
-            if curr % 1980 == 0:
-                pages.append(text[last:curr])
-                last = curr
-                appd_index = curr
-        if appd_index != len(text) - 1:
-            pages.append(text[last:curr])
-        return list(filter(lambda a: a != '', pages))
 
     def cleanup_code(self, content):
         """Automatically removes code blocks from the code."""

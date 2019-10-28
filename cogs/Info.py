@@ -4,6 +4,7 @@ import aiohttp
 import psutil
 import platform
 import pathlib
+import inspect
 import time
 import os
 import codecs
@@ -57,6 +58,19 @@ class info(commands.Cog, name='Info'):
 
             if not ctx.command.name in data:
                 return True
+
+    def paginate(text: str):
+        '''Simple generator that paginates text.'''
+        last = 0
+        pages = []
+        for curr in range(0, len(text)):
+            if curr % 1980 == 0:
+                pages.append(text[last:curr])
+                last = curr
+                appd_index = curr
+        if appd_index != len(text) - 1:
+            pages.append(text[last:curr])
+        return list(filter(lambda a: a != '', pages))
 
     @commandExtra(aliases=['source'], category="Bot Info")
     async def sourcecode(self, ctx, *, command=None):
