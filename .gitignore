@@ -1,0 +1,8 @@
+*.json
+*.pyc
+
+db/
+config/
+cogs/Test.py
+
+requirements.txt

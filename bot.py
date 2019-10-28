@@ -16,6 +16,7 @@ log.init()
 from utils.default import get
 from utils import permissions
 from cogs.Music import Player
+from db import tokens
 
 from discord.ext import commands
 
@@ -106,10 +107,7 @@ class Charles(commands.AutoShardedBot):
         #await self.session.close()
 
     async def bot_start(self):
-        with open("db/config.json", "r") as f:
-            data = json.load(f)
-
-        await self.login(data["BOT_TOKEN"])
+        await self.login(tokens.BOT)
         await self.connect()
 
     async def get_context(self, message, *, cls=None):
