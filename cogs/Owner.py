@@ -78,7 +78,7 @@ class Owner(commands.Cog, name="Owner", command_attrs=dict(hidden=True)):
     @commandExtra(category="Other", name='git')
     async def jsk_git(self, ctx: commands.Context, pull_push, *, commit_msg=None):
         """
-        Executes statements in the system shell.
+        Executes git statements in the system shell.
 
         This uses the system shell as defined in $SHELL, or `/bin/bash` otherwise.
         Execution can be cancelled by closing the paginator.
