@@ -77,18 +77,32 @@ class info(commands.Cog, name='Info'):
         '''Get the source code for any command.'''
         if command is None:
             return await ctx.send('https://github.com/iDutchy/Charles')
-        source = inspect.getsource(self.bot.get_command(command).callback)
-        if not source:
-            return await ctx.send(f'{command} is not a valid command.')
+
         try:
+            source = inspect.getsource(self.bot.get_command(command).callback)
+        except AttributeError:
+            return await ctx.send(f"Could not find command `{command}`.")
+        if len(source) + 8 <= 2000:
             await ctx.send(f'```py\n{source}\n```')
-        except:
-            paginated_text = self.paginate(source)
-            for page in paginated_text:
-                if page == paginated_text[-1]:
-                    await ctx.send(f'```py\n{page}\n```')
-                    break
-                await ctx.send(f'```py\n{page}\n```')
+        else:
+
+
+            source_url = 'https://github.com/iDutchy/Charles'
+            branch = 'master'
+
+            obj = self.bot.get_command(command.replace('.', ' '))
+
+            # since we found the command we're looking for, presumably anyway, let's
+            # try to access the code itself
+            src = obj.callback.__code__
+            module = obj.callback.__module__
+            filename = src.co_filename
+
+            lines, firstlineno = inspect.getsourcelines(src)
+            location = module.replace('.', '/') + '.py'
+
+            final_url = f'<{source_url}/blob/{branch}/{location}#L{firstlineno}-L{firstlineno + len(lines) - 1}>'
+            await ctx.send("Source was too long to post on discord, so here's the url to the source on gitub:\n" + final_url)
 
     @groupExtra(invoke_without_command=True, category="Server Info")
     async def guildsettings(self, ctx):
