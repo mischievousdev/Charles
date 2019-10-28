@@ -76,7 +76,7 @@ class info(commands.Cog, name='Info'):
     async def sourcecode(self, ctx, *, command=None):
         '''Get the source code for any command.'''
         if command is None:
-            return await ctx.send('https://github.com/DutchAssassin/Charles')
+            return await ctx.send('https://github.com/iDutchy/Charles')
         source = inspect.getsource(self.bot.get_command(command).callback)
         if not source:
             return await ctx.send(f'{command} is not a valid command.')
