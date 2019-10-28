@@ -304,22 +304,6 @@ class Owner(commands.Cog, name="Owner", command_attrs=dict(hidden=True)):
         await asyncio.sleep(1)
         await self.bot.logout()
 
-    @commandExtra(aliases=['source'], category="Owner Only")
-    async def sourcecode(self, ctx, command):
-        '''Get the source code for any command.'''
-        source = inspect.getsource(self.bot.get_command(command).callback)
-        if not source:
-            return await ctx.send(f'{command} is not a valid command.')
-        try:
-            await ctx.send(f'```py\n{source}\n```')
-        except:
-            paginated_text = self.paginate(source)
-            for page in paginated_text:
-                if page == paginated_text[-1]:
-                    await ctx.send(f'```py\n{page}\n```')
-                    break
-                await ctx.send(f'```py\n{page}\n```')
-
     @commandExtra(category="Messages")
     async def msg(self, ctx, channel : int, *, message : str):
         """Send a message to a channel (use ChannelID) in any server the bot is in"""

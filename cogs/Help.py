@@ -43,7 +43,7 @@ class Help(commands.Cog, name="Help", command_attrs=dict(hidden=True)):
             i = get_text(ctx.guild, "help", "help.main_page.links_field.invite")
             v = get_text(ctx.guild, "help", "help.main_page.links_field.vote")
             d =    get_text(ctx.guild, "help", "help.main_page.links_field.donate")   
-            emb.add_field(name=get_text(ctx.guild, "help", "help.main_page.field_title.links"), value=f"- [{s}](https://discord.gg/wZSH7pz)\n- [{i}](https://discordapp.com/api/oauth2/authorize?client_id=505532526257766411&permissions=1609952598&scope=bot)\n- [{v}](https://discordbots.org/bot/505532526257766411/vote)\n- [{d}](https://donatebot.io/checkout/514232441498763279?buyer=171539705043615744)\n- [Website](https://charles-bot.xyz/)")
+            emb.add_field(name=get_text(ctx.guild, "help", "help.main_page.field_title.links"), value=f"- [{s}](https://discord.gg/wZSH7pz)\n- [{i}](https://discordapp.com/api/oauth2/authorize?client_id=505532526257766411&permissions=1609952598&scope=bot)\n- [{v}](https://discordbots.org/bot/505532526257766411/vote)\n- [{d}](https://donatebot.io/checkout/514232441498763279?buyer=171539705043615744)\n- [Website](https://charles-bot.xyz/)\n- [Source](https://github.com/DutchAssassin/Charles)")
             ac = self.bot.get_channel(519281320686518283)
             a_msg = await ac.fetch_message(int(data["NEWS"]["ID"]))
             a_date = a_msg.created_at.strftime("%b %d, %Y")

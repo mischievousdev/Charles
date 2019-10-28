@@ -58,6 +58,24 @@ class info(commands.Cog, name='Info'):
             if not ctx.command.name in data:
                 return True
 
+    @commandExtra(aliases=['source'], category="Bot Info")
+    async def sourcecode(self, ctx, *, command=None):
+        '''Get the source code for any command.'''
+        if command is None:
+            return await ctx.send('https://github.com/DutchAssassin/Charles')
+        source = inspect.getsource(self.bot.get_command(command).callback)
+        if not source:
+            return await ctx.send(f'{command} is not a valid command.')
+        try:
+            await ctx.send(f'```py\n{source}\n```')
+        except:
+            paginated_text = self.paginate(source)
+            for page in paginated_text:
+                if page == paginated_text[-1]:
+                    await ctx.send(f'```py\n{page}\n```')
+                    break
+                await ctx.send(f'```py\n{page}\n```')
+
     @groupExtra(invoke_without_command=True, category="Server Info")
     async def guildsettings(self, ctx):
         e = discord.Embed(color=self.bot.embed_color)
