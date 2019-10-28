@@ -99,8 +99,6 @@ class Owner(commands.Cog, name="Owner", command_attrs=dict(hidden=True)):
                         return
                     await interface.add_line(line)
 
-                await interface.add_line(f"\n[status] Return code {reader.close_code}")
-
     @commandExtra(category="Other")
     async def setnews(self, ctx, m_id:int, *, news:str):
         with open('db/config.json', 'r') as f:
