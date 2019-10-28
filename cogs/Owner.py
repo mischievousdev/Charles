@@ -76,13 +76,19 @@ class Owner(commands.Cog, name="Owner", command_attrs=dict(hidden=True)):
         return content.strip('` \n')
 
     @commandExtra(category="Other", name='git')
-    async def jsk_git(self, ctx: commands.Context, pull_push, *, commit_msg=None):
+    async def git(self, ctx: commands.Context, pull_push, *, commit_msg=None):
         """
         Executes git statements in the system shell.
 
         This uses the system shell as defined in $SHELL, or `/bin/bash` otherwise.
         Execution can be cancelled by closing the paginator.
         """
+        if pull_push == "push":
+            shellcmd = f'sudo git add .&&sudo git commit -m "{commit_msg}"&&sudo git push'
+        if pull_push == "pull":
+            shellcmd = 'sudo git pull'
+        if pull_push not in ['pull', 'push']: 
+            return await ctx.send("Invalid option given")
 
         async with ReplResponseReactor(ctx.message):
             paginator = WrappedPaginator(prefix="```sh", max_size=1985)
@@ -93,7 +99,8 @@ class Owner(commands.Cog, name="Owner", command_attrs=dict(hidden=True)):
 
             if commit_msg is None:
                 commit_msg = "File changes"
-            with ShellReader(f'sudo git add .&&sudo git commit -m "{commit_msg}"&&sudo git {pull_push}') as reader:
+
+            with ShellReader(shellcmd) as reader:
                 async for line in reader:
                     if interface.closed:
                         return
