@@ -469,7 +469,7 @@ class Events(commands.Cog, name="Events"):
                     if isinstance(emb_dict[thing], str):
                         emb_dict[thing] = emb_dict[thing].replace("{{member.name}}", member.name)
                         emb_dict[thing] = emb_dict[thing].replace("{{member.mention}}", member.mention)
-                        emb_dict[thing] = emb_dict[thing].replace("{{member.fullname}}", member)
+                        emb_dict[thing] = emb_dict[thing].replace("{{member.fullname}}", str(member))
                         emb_dict[thing] = emb_dict[thing].replace("{{member.count}}", f"{sum(1 for m in member.guild.members if not m.bot)}")
                         emb_dict[thing] = emb_dict[thing].replace("{{member.fullcount}}", str(member.guild.member_count))
                         emb_dict[thing] = emb_dict[thing].replace("{{server.name}}", member.guild.name)
