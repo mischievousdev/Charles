@@ -78,8 +78,12 @@ class info(commands.Cog, name='Info'):
         if command is None:
             return await ctx.send('https://github.com/iDutchy/Charles')
 
+        cmd = self.bot.get_command(command)
+        if cmd.cog_name.lower() == "test":
+            return await ctx.send("This is a testing command. I can not show you the source of this command yet.")
+
         try:
-            source = inspect.getsource(self.bot.get_command(command).callback)
+            source = inspect.getsource(cmd.callback)
         except AttributeError:
             return await ctx.send(f"Could not find command `{command}`.")
         if len(source) + 8 <= 2000:
