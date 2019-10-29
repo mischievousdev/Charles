@@ -46,7 +46,7 @@ class Events(commands.Cog, name="Events"):
         elif isinstance(err.original, discord.Forbidden):
             errormsg=discord.Embed(color=0xFF7070)
             errormsg.add_field(name="<:warn:620414236010741783> **Permissions Error:** Insufficient permissions!",
-                               value="You do not have the permissions to ececute this command.")
+                               value="You do not have the permissions to execute this command.")
             await ctx.send(embed=errormsg)
 
         elif isinstance(err, errors.CommandInvokeError):
@@ -463,16 +463,29 @@ class Events(commands.Cog, name="Events"):
         if data["Guild_Logs"]["Welcome_Msg"]["embedtoggle"] == "enabled":
 
             emb_dict = data["Guild_Logs"]["Welcome_Msg"]["embedmsg"]
-
-            for thing in emb_dict:
-                if isinstance(emb_dict[thing], str):
-                    emb_dict[thing] = emb_dict[thing].replace("{{member.name}}", member.name)
-                    emb_dict[thing] = emb_dict[thing].replace("{{member.mention}}", member.mention)
-                    emb_dict[thing] = emb_dict[thing].replace("{{member.fullname}}", f"{member.name}#{str(member.discriminator)}")
-                    emb_dict[thing] = emb_dict[thing].replace("{{member.count}}", f"{str(sum(1 for m in member.guild.members if not m.bot))}")
-                    emb_dict[thing] = emb_dict[thing].replace("{{member.fullcount}}", str(member.guild.member_count))
-                    emb_dict[thing] = emb_dict[thing].replace("{{server.name}}", member.guild.name)
-                    emb_dict[thing] = emb_dict[thing].replace("{{server.owner}}", self.bot.get_user(member.guild.owner_id).name)
+            
+            def placeholder_replacer(self, emb_dict):
+                for thing in emb_dict:
+                    if isinstance(emb_dict[thing], str):
+                        emb_dict[thing] = emb_dict[thing].replace("{{member.name}}", member.name)
+                        emb_dict[thing] = emb_dict[thing].replace("{{member.mention}}", member.mention)
+                        emb_dict[thing] = emb_dict[thing].replace("{{member.fullname}}", member)
+                        emb_dict[thing] = emb_dict[thing].replace("{{member.count}}", f"{sum(1 for m in member.guild.members if not m.bot)}")
+                        emb_dict[thing] = emb_dict[thing].replace("{{member.fullcount}}", str(member.guild.member_count))
+                        emb_dict[thing] = emb_dict[thing].replace("{{server.name}}", member.guild.name)
+                        emb_dict[thing] = emb_dict[thing].replace("{{server.owner}}", self.bot.get_user(member.guild.owner_id).name)
+                return emb_dict
+            
+            emb_dict = self.placeholder_replacer(emb_dict)
+            if "author" in emb_dict:
+                emb_dict["author"] = self.placeholder_replacer(emb_dict["author"])
+            if "footer" in emb_dict:
+                emb_dict["footer"] = self.placeholder_replacer(emb_dict["footer"])
+            if "fields" in emb_dict:
+                for field in emb_dict["fields"]:
+                    emb_dict["fields"] = self.placeholder_replacer(field["name"])
+                    emb_dict["fields"] = self.placeholder_replacer(field["value"])
+            
 
             channel = self.bot.get_channel(int(data["Guild_Logs"]["Welcome_Msg"]["channel"]))
             await channel.send(embed=discord.Embed.from_dict(emb_dict))
