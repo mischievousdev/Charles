@@ -51,34 +51,34 @@ def music_check(no_channel=False, bot_no_channel=False, same_channel=False, not_
                 return False
 
         if no_tracks_skip == True:
-            if ctx.player.queue.qsize() <= 0:
+            if len(list(ctx.player.queue._queue)) <= 0:
                 await ctx.send('There are no tracks in the queue to skip too.')
                 return False
 
-        if seekable == True:
-            if not ctx.player.current.is_seekable:
-                await ctx.send('This track is not seekable.')
-                return False
+        #if seekable == True:
+        #    if not ctx.player.current.is_seekable:
+        #        await ctx.send('This track is not seekable.')
+        #        return False
 
         if no_tracks_shuffle == True:
-            if ctx.player.queue.qsize() <= 0:
+            if len(list(ctx.player.queue._queue)) <= 0:
                 await ctx.send('Add more tracks to the queue to enable queue track shuffling.')
                 return False
 
-        if no_tracks_clear == True:
-            if ctx.player.queue.qsize() <= 0:
-                await ctx.send('Add more tracks to the queue to enable queue clearing.')
-                return False
+        #if no_tracks_clear == True:
+        #    if len(list(ctx.player.queue._queue)) <= 0:
+        #        await ctx.send('Add more tracks to the queue to enable queue clearing.')
+        #        return False
 
-        if no_tracks_remove == True:
-            if ctx.player.queue.qsize() <= 0:
-                await ctx.send('Add more tracks to the queue to enable queue track removing.')
-                return False
+        #if no_tracks_remove == True:
+        #    if len(list(ctx.player.queue._queue)) <= 0:
+        #        await ctx.send('Add more tracks to the queue to enable queue track removing.')
+        #        return False
 
-        if no_tracks_move == True:
-            if ctx.player.queue.qsize() <= 0:
-                await ctx.send('Add more tracks to the queue to enable queue track moving.')
-                return False
+        #if no_tracks_move == True:
+        #    if ctx.player.queue.qsize() <= 0:
+        #        await ctx.send('Add more tracks to the queue to enable queue track moving.')
+        #        return False
 
         return True
 

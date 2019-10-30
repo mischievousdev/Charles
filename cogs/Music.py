@@ -19,6 +19,7 @@ from collections import deque
 from discord.ext import commands
 from typing import Union
 from functools import partial
+from utils.checks import music_check
 from utils.translate import get_text
 from utils.default import commandExtra, groupExtra
 from youtube_dl import YoutubeDL
@@ -495,6 +496,7 @@ class Music(commands.Cog, name="Music"):
             embed.set_footer(text=get_text(ctx.guild, 'music', 'music.vote.votes_needed').format(self.required(player, ctx.invoked_with) - len(attr)))
             await ctx.send(embed=embed, delete_after=45)
 
+    @music_check(no_channel=True)
     @commandExtra(name='connect', aliases=['join'], category="Basic")
     async def connect_(self, ctx, *, channel: discord.VoiceChannel = None):
         """Connect to voice.
@@ -529,6 +531,7 @@ class Music(commands.Cog, name="Music"):
         await ctx.send(embed=e, delete_after=10)
         await player.connect(channel.id)
 
+    @music_check(no_channel=True)
     @commandExtra(name='play', aliases=['sing'], category="Basic")
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def play_(self, ctx, *, query: str):
@@ -587,6 +590,7 @@ class Music(commands.Cog, name="Music"):
             await ctx.send(embed=embed, delete_after=15)
             await player.queue.put(Track(track.id, track.info, ctx=ctx))
 
+    @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True)
     @commandExtra(name='now_playing', aliases=['np', 'current', 'currentsong'], category="Player Information")
     async def now_playing(self, ctx):
         """Invoke the player controller.
@@ -662,7 +666,7 @@ class Music(commands.Cog, name="Music"):
                 await controller_msg.edit(embed=await Player.lyrics_page(self=player, ctx=ctx))
 
 
-
+    @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True)
     @commandExtra(name='pause', category="Player Controls")
     async def pause_(self, ctx):
         """Pause the currently playing song.
@@ -693,6 +697,7 @@ class Music(commands.Cog, name="Music"):
         player.paused = True
         await player.set_pause(True)
 
+    @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True)
     @commandExtra(name='resume', category="Player Controls")
     async def resume_(self, ctx):
         """Resume a currently paused song.
@@ -721,6 +726,7 @@ class Music(commands.Cog, name="Music"):
         player.resumetime = datetime.datetime.utcnow()
         await player.set_pause(False)
 
+    @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True, no_tracks_skip=True)
     @commandExtra(name='skip', category="Player Controls")
     @commands.cooldown(5, 10, commands.BucketType.user)
     async def skip_(self, ctx):
@@ -752,6 +758,7 @@ class Music(commands.Cog, name="Music"):
 
         await player.stop()
 
+    @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True)
     @commandExtra(name='stop', category="Player Controls")
     @commands.cooldown(3, 30, commands.BucketType.guild)
     async def stop_(self, ctx):
@@ -779,6 +786,7 @@ class Music(commands.Cog, name="Music"):
 
         await player.destroy()
 
+    @music_check(no_channel=True, bot_no_channel=True, same_channel=True)
     @commandExtra(name='volume', aliases=['vol'], category="Player Controls")
     @commands.cooldown(1, 2, commands.BucketType.guild)
     async def volume_(self, ctx, *, value: int):
@@ -821,6 +829,7 @@ class Music(commands.Cog, name="Music"):
         embed.description = f'{emoji} ' + get_text(ctx.guild, "music", "music.set_volume").format(player.volume)
         await ctx.send(embed=embed, delete_after=7)
 
+    @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True)
     @commandExtra(name='queue', aliases=['q', 'que'], category="Player Information")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def queue_(self, ctx, page: int = 1):
@@ -865,6 +874,7 @@ class Music(commands.Cog, name="Music"):
         await ctx.send(embed=embed)
 
     @checks.has_voted()
+    @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True, no_tracks_shuffle=True)
     @commandExtra(name='shuffle', aliases=['mix'], category="Player Controls")
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def shuffle_(self, ctx):
@@ -897,6 +907,7 @@ class Music(commands.Cog, name="Music"):
         random.shuffle(player.queue._queue)
 
     @checks.has_voted()
+    @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True)
     @commandExtra(name='repeat', category="Player Controls")
     async def repeat_(self, ctx):
         """Repeat the currently playing song.
@@ -934,6 +945,7 @@ class Music(commands.Cog, name="Music"):
             player.loop = 0
 
     @checks.has_voted()
+    @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True)
     @commandExtra(name='eq', category="Player Controls")
     async def set_eq(self, ctx, *, eq: str):
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=Player)
@@ -948,6 +960,7 @@ class Music(commands.Cog, name="Music"):
         await ctx.send(embed=embed, delete_after=25)
 
     @checks.has_voted()
+    @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True)
     @commandExtra(name="seek", category="Player Controls")
     async def seek(self, ctx, time:int):
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=Player)
@@ -962,6 +975,7 @@ class Music(commands.Cog, name="Music"):
             await ctx.send(embed=discord.Embed(color=self.bot.embed_color, description=f"<:forwards:600682023832518657> " + get_text(ctx.guild, 'music', 'music.pos_for').format(ctx.author.mention, newpos)), delete_after=5)
 
     @checks.has_voted()
+    @music_check(no_channel=True, bot_no_channel=True, same_channel=True)
     @commandExtra(category="Player Controls")
     async def find(self, ctx, *, query):
         """ Lists the first 10 search results from a given query. """
@@ -1148,6 +1162,7 @@ class Music(commands.Cog, name="Music"):
 
         await ctx.send(get_text(ctx.guild, 'music', 'music.pl.song_added').format(title, playlist))
 
+    @music_check(no_channel=True, bot_no_channel=True, same_channel=True)
     @playlist.command(aliases=['play'])
     async def start(self, ctx, *, playlist):
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=Player)

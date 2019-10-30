@@ -15,7 +15,7 @@ class Events(commands.Cog, name="Events"):
         self.icon = ""
         self.big_icon = ""
     
-     def placeholder_replacer(self, emb_dict, member):
+    def placeholder_replacer(self, emb_dict, member):
         for thing in emb_dict:
             if isinstance(emb_dict[thing], str):
                 emb_dict[thing] = emb_dict[thing].replace("{{member.name}}", member.name)
