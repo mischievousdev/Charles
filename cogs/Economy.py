@@ -9,6 +9,22 @@ from discord.ext import commands
 from utils import checks, ReadableTime
 from datetime import datetime, timedelta
 
+card_list = {
+    "2": random.choice(["<:2D:638905315680845875>", "<:2C:638905316645273605>", "<:2H:638904540543844376>", "<:2S:638904816176857098>"]),
+    "3": random.choice(["<:3D:638905315894493185>", "<:3C:638905317014372382>", "<:3H:638904540665479208>", "<:3S:638904816298360832>"]),
+    "4": random.choice(["<:4D:638905315156295681>", "<:4C:638905316322312192>", "<:4H:638904540065955863>", "<:4S:638904816017604649>"]),
+    "5": random.choice(["<:5D:638905315844161546>", "<:5C:638905316402135052>", "<:5H:638904542242799659>", "<:5S:638904816126394388>"]),
+    "6": random.choice(["<:6D:638905315840229395>", "<:6C:638905316788142110>", "<:6H:638904540418015253>", "<:6S:638904816168599572>"]),
+    "7": random.choice(["<:7D:638905315324330004>", "<:7C:638905316670701599>", "<:7H:638904540711747584>", "<:7S:638904816021667840>"]),
+    "8": random.choice(["<:8D:638905316502929438>", "<:8C:638905316691542016>", "<:8H:638904540405694478>", "<:8S:638904816256548864>"]),
+    "9": random.choice(["<:9D:638905315735371787>", "<:9C:638905316645273635>", "<:9H:638904540799959040>", "<:9S:638904816067805185>"]),
+    "10": random.choice(["<:10D:638905315311616036>", "<:10C:638905316368449557>", "<:10H:638904540862742557>", "<:10S:638904816130719745>"]),
+    "11": random.choice(["<:AD:638905314992848906>", "<:AC:638905316381032461>", "<:AH:638904540690644992>", "<:AS:638904816248029184>"]),
+    "K": random.choice(["<:KD:638905315206627380>", "<:KC:638905316519706654>", "<:KH:638904540665610299>", "<:KS:638904816160079872>"]),
+    "Q": random.choice(["<:QD:638905315487645706>", "<:QC:638905316435820556>", "<:QH:638904543987367937>", "<:QS:638904816281583616>"]),
+    "J": random.choice(["<:JD:638905315395633162>", "<:JC:638905316339220503>", "<:JH:638904540703358976>", "<:JS:638904816474783744>"])
+}
+
 class Economy(commands.Cog, name="Economy"):
     def __init__(self, bot):
         self.bot = bot
@@ -223,6 +239,165 @@ class Economy(commands.Cog, name="Economy"):
         self.dump_data(ctx, d)
 
         await ctx.send(f"Withdrew ${amount} from your bank!")
+
+
+    @staticmethod
+    def generate_cards():
+        cards_out = list()
+        cards_out_n = list()
+        amount = 0
+        cards = [card for card in card_list]
+        has_hit = False
+        while True:
+            card = random.choice(cards)
+            if card not in cards_out:
+                cards_out.append(card)
+                if card in ["K", "Q", "J"]:
+                    card = 10
+                if card == "11":
+                    if not has_hit or not amount > 11:
+                        card = 11
+                        has_hit = True
+                    else:
+                        card = 1
+                amount += int(card)
+                cards_out_n.append(int(card))
+            if len(cards_out) == 5:
+                break
+        return cards_out, cards_out_n, amount
+
+    async def blackjack_input(self, ctx):
+        while True:
+            x = await self.bot.wait_for("message", check=lambda m: m.channel == ctx.message.channel and m.author == ctx.author)
+
+            if str(x.content).lower() == "hit":
+                move = 0
+                break
+            elif str(x.content).lower() == "stay":
+                move = 1
+                break
+            else:
+                pass
+        try:
+            await x.delete()
+        except:
+            pass
+        return move
+
+    @checks.testcommand()
+    @commands.command(aliases=["bjtest"])
+    async def blackjacktest(self, ctx, amount: int):
+        """blackjack"""
+
+        if amount <= 0:
+            return await ctx.send("You can't bet that low...")
+#        if (author_balance - amount) < 0:
+#            return await ctx.send("You don't have that much to bet...")
+        if amount > 50000:
+            return await ctx.send("You can't bet past 50k")
+
+#        await self.__update_balance(ctx.author.id, author_balance - amount)
+#        await self.__add_bettime(ctx.author.id)
+
+        author_deck, author_deck_n, author_amount = self.generate_cards()
+        bot_deck, bot_deck_n, bot_amount = self.generate_cards()
+        get_amount = lambda i, a: [i[z] for z in range(a)]
+
+        em = discord.Embed(color=self.bot.embed_color, title="Blackjack", description="Type `hit` or `stay`.")
+        em.add_field(name="Your Cards ({})".format(sum(get_amount(author_deck_n, 2))),
+                     value=" ".join([card_list[x] for x in get_amount(author_deck, 2)]),
+                     inline=True)
+        em.add_field(name="My Cards (?)",
+                     value=" ".join(["<:cardback:638904890302660628>" for x in get_amount(bot_deck, 2)]),
+                     inline=True)
+
+        msg = await ctx.send(embed=em)
+
+        bot_val = 2
+        bot_stay = False
+        for i, x in enumerate(range(3), start=3):
+            move = await self.blackjack_input(ctx)
+            em = discord.Embed(color=self.bot.embed_color, title="Blackjack", description="Type `hit` or `stay`.")
+
+            if not bot_stay:
+                if bot_val == 4:
+                    bot_stay = True
+                elif sum(get_amount(bot_deck_n, bot_val)) <= 16:
+                    bot_val += 1
+                elif sum(get_amount(bot_deck_n, bot_val)) == 21:
+                    bot_stay = True
+                else:
+                    if random.randint(0, 1) == 0:
+                        bot_stay = True
+                    else:
+                        bot_val += 1
+
+            if move == 1:
+                i -= 1
+                em.add_field(name="Your Cards ({})".format(sum(get_amount(author_deck_n, i))),
+                             value=" ".join([card_list[x] for x in get_amount(author_deck, i)]),
+                             inline=True)
+                em.add_field(name="My Cards ({})".format(sum(get_amount(bot_deck_n, bot_val))),
+                             value=" ".join([card_list[x] for x in get_amount(bot_deck, bot_val)]),
+                             inline=True)
+
+                if sum(get_amount(author_deck_n, i)) == sum(get_amount(bot_deck_n, bot_val)):
+                    em.description = "Nobody won."
+#                    await self.__update_balance(ctx.author.id, (await self.__get_balance(ctx.author.id)) + amount)
+                elif sum(get_amount(author_deck_n, i)) > 21 and sum(get_amount(bot_deck_n, bot_val)) > 21:
+                    em.description = "Nobody won."
+#                    await self.__update_balance(ctx.author.id, (await self.__get_balance(ctx.author.id)) + amount)
+                elif sum(get_amount(author_deck_n, i)) > sum(get_amount(bot_deck_n, bot_val)) or \
+                    sum(get_amount(bot_deck_n, bot_val)) > 21:
+                    em.description = "You beat me"
+#                    await self.__update_balance(ctx.author.id, (await self.__get_balance(ctx.author.id)) + int(amount * 1.75))
+                else:
+                    em.description = "I beat you"
+
+                await msg.edit(embed=em)
+                return
+
+            if sum(get_amount(bot_deck_n, bot_val)) > 21 or sum(get_amount(author_deck_n, i)) > 21:
+                if sum(get_amount(author_deck_n, i)) > 21 and sum(get_amount(bot_deck_n, bot_val)) > 21:
+                    em.description = "Nobody won."
+#                    await self.__update_balance(ctx.author.id, (await self.__get_balance(ctx.author.id)) + amount)
+                elif sum(get_amount(author_deck_n, i)) > 21:
+                    em.description = "You went over 21 and I won"
+                else:
+                    em.description = "I went over 21 and you won"
+#                    await self.__update_balance(ctx.author.id, (await self.__get_balance(ctx.author.id)) + int(amount * 1.75))
+                em.add_field(name="Your Cards ({})".format(sum(get_amount(author_deck_n, i))),
+                             value=" ".join([card_list[x] for x in get_amount(author_deck, i)]),
+                             inline=True)
+                em.add_field(name="My Cards ({})".format(sum(get_amount(bot_deck_n, bot_val))),
+                             value=" ".join([card_list[x] for x in get_amount(bot_deck, bot_val)]),
+                             inline=True)
+                await msg.edit(embed=em)
+                return
+
+            em.add_field(name="Your Cards ({})".format(sum(get_amount(author_deck_n, i))),
+                         value=" ".join([card_list[x] for x in get_amount(author_deck, i)]),
+                         inline=True)
+            em.add_field(name="My Cards (?)",
+                         value=" ".join(["<:cardback:638904890302660628>" for x in get_amount(bot_deck, bot_val)]),
+                         inline=True)
+            await msg.edit(embed=em)
+        if sum(get_amount(bot_deck_n, 5)) > 21 or sum(get_amount(author_deck_n, 5)) > 21:
+            if sum(get_amount(author_deck_n, i)) > 21 and sum(get_amount(bot_deck_n, bot_val)) > 21:
+                em.description = "Nobody won."
+#                await self.__update_balance(ctx.author.id, (await self.__get_balance(ctx.author.id)) + amount)
+            elif sum(get_amount(author_deck_n, i)) > 21:
+                em.description = "You went over 21 and I won"
+            else:
+                em.description = "I went over 21 and you won"
+#                await self.__update_balance(ctx.author.id, (await self.__get_balance(ctx.author.id)) + int(amount * 1.75))
+            em.add_field(name="Your Cards ({})".format(sum(get_amount(author_deck_n, i))),
+                         value=" ".join([card_list[x] for x in get_amount(author_deck, i)]),
+                         inline=True)
+            em.add_field(name="My Cards ({})".format(sum(get_amount(bot_deck_n, bot_val))),
+                         value=" ".join([card_list[x] for x in get_amount(bot_deck, bot_val)]),
+                         inline=True)
+            await msg.edit(embed=em)
 
 
 

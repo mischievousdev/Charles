@@ -41,7 +41,7 @@ def music_check(no_channel=False, bot_no_channel=False, same_channel=False, not_
                 return False
 
         if same_channel == True:
-            if not ctx.player.channel_id == ctx.author.voice.channel.id:
+            if not int(ctx.player.channel_id) == ctx.author.voice.channel.id:
                 await ctx.send(f'You must be in the same voice channel as me to use this command.')
                 return False
 
