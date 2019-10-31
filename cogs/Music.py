@@ -1162,7 +1162,7 @@ class Music(commands.Cog, name="Music"):
 
         await ctx.send(get_text(ctx.guild, 'music', 'music.pl.song_added').format(title, playlist))
 
-    @music_check(no_channel=True, bot_no_channel=True, same_channel=True)
+    @music_check(no_channel=True)
     @playlist.command(aliases=['play'])
     async def start(self, ctx, *, playlist):
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=Player)
