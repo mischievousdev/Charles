@@ -4,5 +4,6 @@
 db/
 config/
 cogs/Test.py
+cogs/Economy.py
 
 requirements.txt
