@@ -80,6 +80,9 @@ class info(commands.Cog, name='Info'):
             return await ctx.send(source_url)
 
         cmd = self.bot.get_command(command)
+        if cmd is None:
+            return await ctx.send("This command doesn't exist!")
+        
         if cmd.cog_name.lower() == "test":
             return await ctx.send("This is a testing command. I can not show you the source of this command yet.")
         
