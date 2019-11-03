@@ -394,8 +394,8 @@ class info(commands.Cog, name='Info'):
                 if ctx.guild.premium_subscription_count is not None:
                     boostmsg = get_text(ctx.guild, 'info', 'info.boost_count').format('⠀'*int(9), ctx.guild.premium_subscription_count)
                     boostmsg += "\n`{0}{1}`\n".format('\U00002588'*(int(ctx.guild.premium_subscription_count if ctx.guild.premium_subscription_count <= 30 else 30)), '⠀'*(30-(int(round(ctx.guild.premium_subscription_count)))))
-                    boostmsg += "⠀|  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀|⠀⠀⠀⠀⠀  ⠀⠀⠀⠀⠀⠀|\n"
-                    boostmsg += "Lvl 1⠀⠀⠀⠀⠀⠀⠀⠀Lvl 2⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀Lvl 3\n"
+                    boostmsg += "`⠀|⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀|⠀⠀⠀⠀⠀⠀  ⠀⠀⠀⠀⠀⠀|`\n"
+                    boostmsg += "Lvl 1⠀⠀⠀⠀⠀⠀⠀⠀Lvl 2⠀⠀⠀⠀⠀⠀⠀⠀⠀Lvl 3\n"
                     boostmsg += "{0}".format(next_level_calc(ctx))
 
                     last_boost = max(ctx.guild.members, key=lambda m: m.premium_since or ctx.guild.created_at)
