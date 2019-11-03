@@ -75,13 +75,14 @@ class info(commands.Cog, name='Info'):
     @commandExtra(aliases=['source'], category="Bot Info")
     async def sourcecode(self, ctx, *, command=None):
         '''Get the source code for any command.'''
+        source_url = 'https://github.com/iDutchy/Charles'
         if command is None:
-            return await ctx.send('https://github.com/iDutchy/Charles')
+            return await ctx.send(source_url)
 
         cmd = self.bot.get_command(command)
         if cmd.cog_name.lower() == "test":
             return await ctx.send("This is a testing command. I can not show you the source of this command yet.")
-
+        
         try:
             source = inspect.getsource(cmd.callback)
         except AttributeError:
@@ -89,11 +90,7 @@ class info(commands.Cog, name='Info'):
         if len(source) + 8 <= 2000:
             await ctx.send(f'```py\n{source}\n```')
         else:
-
-
-            source_url = 'https://github.com/iDutchy/Charles'
             branch = 'master'
-
             obj = self.bot.get_command(command.replace('.', ' '))
 
             # since we found the command we're looking for, presumably anyway, let's
@@ -106,7 +103,7 @@ class info(commands.Cog, name='Info'):
             location = module.replace('.', '/') + '.py'
 
             final_url = f'<{source_url}/blob/{branch}/{location}#L{firstlineno}-L{firstlineno + len(lines) - 1}>'
-            await ctx.send("Source was too long to post on discord, so here's the url to the source on gitub:\n" + final_url)
+            await ctx.send(f"Source was too long to post on discord, so here's the url to the source on GitHub:\n{final_url}")
 
     @groupExtra(invoke_without_command=True, category="Server Info")
     async def guildsettings(self, ctx):
