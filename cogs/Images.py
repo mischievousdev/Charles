@@ -27,7 +27,15 @@ class Images(commands.Cog, name="Images"):
                 else:
                     return str(u.avatar_url_as(format="png"))
             except Exception:
-                return str(user.strip("<>"))
+                try:
+                    e = await commands.EmojiConverter().convert(ctx, user)
+                    return str(e.url)
+                except Exception:
+                    try:
+                        e = await commands.PartialEmojiConverter().convert(ctx, user)
+                        return str(e.url)
+                    except Exception:
+                        return str(user.strip("<>"))
 
 
         await ctx.trigger_typing()
