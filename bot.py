@@ -50,7 +50,7 @@ BOT_EXTENSIONS = [
     'cogs.Events',
     'cogs.Info',
     'cogs.Moderation',
-    'cogs.GuildSettings',
+    'cogs.Settings',
     'cogs.dbl',
     'cogs.Utility',
     'cogs.Test',
