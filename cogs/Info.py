@@ -461,6 +461,12 @@ class info(commands.Cog, name='Info'):
                 bughunter = "<:bughunter:633796873144238090> Bug Hunter"
                 acknowledgements.append(bughunter)
 
+        eventwinner_role = supportguild.get_role(642176542897864734)
+        if user in supportguild.members:
+            if user in eventwinner_role.members:
+                eventwinner = "<:trophy:642177400565792798> Event Winner"
+                acknowledgements.append(eventwinner)
+
         embed.add_field(name=get_text(ctx.guild, 'info', 'info.status'), value=f"**{get_text(ctx.guild, 'info', 'info.status.mobile')}:** {user.mobile_status}\n**{get_text(ctx.guild, 'info', 'info.status.desktop')}:** {user.desktop_status}\n**{get_text(ctx.guild, 'info', 'info.status.web')}:** {user.web_status}")
         if acknowledgements:
             embed.add_field(name=get_text(ctx.guild, 'info', 'info.acknowledgements'), value="\n".join(acknowledgements))
