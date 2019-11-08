@@ -15,7 +15,6 @@ import lxml.etree as etree
 from discord.ext import commands
 from utils import default, checks, permissions
 from utils import Nullify
-from utils import DisplayName
 from utils import FuzzySearch
 from utils import cache
 from utils.default import commandExtra, groupExtra
