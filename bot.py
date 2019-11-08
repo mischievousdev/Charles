@@ -13,7 +13,6 @@ import os
 from utils.logger import log
 log.init()
 
-from utils.default import get
 from utils import permissions
 from cogs.Music import Player
 from db import tokens
