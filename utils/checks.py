@@ -3,8 +3,6 @@ import discord
 
 
 from discord.ext import commands
-from utils.config import Config
-config = Config()
 #from cogs.dbl import DiscordBotsOrgAPI
 
 class owner_only(commands.CommandError):
@@ -28,7 +26,7 @@ class no_permission(commands.CommandError):
 class music_error(commands.CommandError):
     pass
 
-def music_check(no_channel=False, bot_no_channel=False, same_channel=False, not_playing=False, no_tracks_skip=False, seekable=False, no_tracks_shuffle=False, no_tracks_clear=False, no_tracks_remove=False, no_tracks_move=False):
+def music_check(no_channel=False, bot_no_channel=False, same_channel=False, not_playing=False, seekable=False, no_tracks_shuffle=False, no_tracks_clear=False, no_tracks_remove=False, no_tracks_move=False):
     async def predicate(ctx):
         if no_channel == True:
             if not ctx.author.voice or not ctx.author.voice.channel:
@@ -48,11 +46,6 @@ def music_check(no_channel=False, bot_no_channel=False, same_channel=False, not_
         if not_playing == True:
             if not ctx.player.current:
                 await ctx.send('No tracks currently playing.')
-                return False
-
-        if no_tracks_skip == True:
-            if len(list(ctx.player.queue._queue)) <= 0:
-                await ctx.send('There are no tracks in the queue to skip too.')
                 return False
 
         #if seekable == True:
@@ -111,18 +104,10 @@ def testcommand():
 
 def is_owner():
     def predicate(ctx):
-        if ctx.author.id == config.owner_id:
+        if ctx.author.id == ctx.bot.owner_id:
             return True
         else:
             raise owner_only
-    return commands.check(predicate)
-
-def is_support():
-    async def predicate(ctx):
-        if ctx.author.id in config.support_ids or ctx.author.id == config.owner_id:
-            return True
-        else:
-            raise support_only
     return commands.check(predicate)
 
 def is_admin():

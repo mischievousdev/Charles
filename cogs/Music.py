@@ -726,7 +726,7 @@ class Music(commands.Cog, name="Music"):
         player.resumetime = datetime.datetime.utcnow()
         await player.set_pause(False)
 
-    @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True, no_tracks_skip=True)
+    @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True)
     @commandExtra(name='skip', category="Player Controls")
     @commands.cooldown(5, 10, commands.BucketType.user)
     async def skip_(self, ctx):
@@ -758,7 +758,7 @@ class Music(commands.Cog, name="Music"):
 
         await player.stop()
 
-    @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True)
+    @music_check(no_channel=True, bot_no_channel=True, same_channel=True)
     @commandExtra(name='stop', category="Player Controls")
     @commands.cooldown(3, 30, commands.BucketType.guild)
     async def stop_(self, ctx):
