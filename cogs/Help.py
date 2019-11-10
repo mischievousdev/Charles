@@ -44,7 +44,7 @@ class HelpCommand(commands.HelpCommand):
         emb.add_field(name=get_text(ctx.guild, "help", "help.command_help.aliases"), value=aliases)
         return emb
 
-    async def send_bot_help(self):
+    async def send_bot_help(self, mapping):
         emb = discord.Embed(color=self.bot.embed_color)
         emb.description = get_text(ctx.guild, "help", "help.main_page.description").format(owner)
         emb.set_thumbnail(url="https://cdn.discordapp.com/avatars/505532526257766411/d1cde11602889bd799dec9a82e29609f.webp?size=1024")
@@ -73,11 +73,11 @@ class HelpCommand(commands.HelpCommand):
         await ctx.send(embed=emb)
     
     async def send_command_help(self, command):
-        formatted = self.common_command_formatting(discord.Embed(color=discord.Color.from_color(54,57,62)), command)
+        formatted = self.common_command_formatting(discord.Embed(color=discord.Color.from_rgb(54,57,62)), command)
         await ctx.send(embed=formatted)
     
     async def send_group_help(self, group):
-        formatted = self.common_command_formatting(discord.Embed(color=discord.Color.from_color(54,57,62)), group)
+        formatted = self.common_command_formatting(discord.Embed(color=discord.Color.from_rgb(54,57,62)), group)
         for group_command in c.commands:
             try:
                 sub_cmd_list += f"`╚╡` **{group_command.name}** - {get_text(ctx.guild, f'{c.cog.qualified_name.lower()}_help', f'{group_command.parent}_{group_command.name}_brief')}\n"
@@ -89,7 +89,7 @@ class HelpCommand(commands.HelpCommand):
     
     async def send_cog_help(self, cog):
         ctx = self.context
-        if (cog.name.upper() in self.owner_cogs and not await self.context.bot.is_owner(self.context.author)) or cog.name.upper() in self.ignore_cogs:
+        if (cog.qualified_name.upper() in self.owner_cogs and not await self.context.bot.is_owner(self.context.author)) or cog.name.upper() in self.ignore_cogs:
             return
         pages = {}
         for cmd in cog.commands:
