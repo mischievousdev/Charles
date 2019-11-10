@@ -1,8 +1,5 @@
-import time
-import json
 import timeago as timesince
 
-from collections import namedtuple
 from discord.ext import commands
 
 
@@ -31,4 +28,3 @@ def date(target, clock=True):
     if clock is False:
         return target.strftime("%d %B %Y")
     return target.strftime("%d %B %Y, %H:%M")
-
