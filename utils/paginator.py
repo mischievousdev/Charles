@@ -32,12 +32,15 @@ class Pages:
     permissions: discord.Permissions
         Our permissions for the channel.
     """
-    def __init__(self, ctx, *, entries, per_page=12, show_entry_count=True, title=None, embed_color = discord.Color.blurple()):
+    def __init__(self, ctx, *, entries, per_page=12, show_entry_count=True, title=None, thumbnail=None, footericon=None, footertext=None, embed_color = discord.Color.blurple()):
         self.bot = ctx.bot
         self.entries = entries
         self.message = ctx.message
         self.channel = ctx.channel
         self.author = ctx.author
+        self.thumbnail = thumbnail
+        self.footericon = footericon
+        self.footertext = footertext
         self.title = title
         self.per_page = per_page
         pages, left_over = divmod(len(self.entries), self.per_page)
@@ -48,10 +51,9 @@ class Pages:
         self.paginating = len(entries) > per_page
         self.show_entry_count = show_entry_count
         self.reaction_emojis = [
-            ('\N{BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}', self.first_page),
             ('\N{BLACK LEFT-POINTING TRIANGLE}', self.previous_page),
+            ('\U000023f9', self.stop_pages),
             ('\N{BLACK RIGHT-POINTING TRIANGLE}', self.next_page),
-            ('\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}', self.last_page),
         ]
 
         if ctx.guild is not None:
@@ -250,25 +252,23 @@ class FieldPages(Pages):
     """Similar to Pages except entries should be a list of
     tuples having (key, value) to show as embed fields instead.
     """
-    def __init__(self, ctx, *, entries, per_page=12, show_entry_count=True, description=None, title=None, embed_color = discord.Color.blurple()):
-        super().__init__(ctx, entries=entries, per_page=per_page, show_entry_count=show_entry_count, title=title, embed_color=embed_color)
-        self.description = description
+    def __init__(self, ctx, *, entries, per_page=12, show_entry_count=True, title, thumbnail, footericon, footertext, embed_color = discord.Color.blurple()):
+        super().__init__(ctx, entries=entries, per_page=per_page, show_entry_count=show_entry_count, title=title, thumbnail=thumbnail, footericon=footericon, footertext=footertext, embed_color=embed_color)
 
     def prepare_embed(self, entries, page, *, first=False):
         self.embed.clear_fields()
-        self.embed.description = self.description or discord.Embed.Empty
-        self.embed.title = self.title or discord.Embed.Empty
 
         for key, value in entries:
             self.embed.add_field(name=key, value=value, inline=False)
-
+        
         if self.maximum_pages > 1:
             if self.show_entry_count:
-                text = f'Page {page}/{self.maximum_pages} ({len(self.entries)} entries)'
+                text = f' [{page}/{self.maximum_pages}]'
             else:
-                text = f'Page {page}/{self.maximum_pages}'
+                text = f' [{page}/{self.maximum_pages}]'
 
-            self.embed.set_footer(text=text)
+            self.embed.set_footer(icon_url = self.footericon, text=self.footertext)
+            self.embed.set_thumbnail(url=self.thumbnail)
 
 class TextPages(Pages):
     """Uses a commands.Paginator internally to paginate some text."""
