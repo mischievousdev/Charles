@@ -508,7 +508,7 @@ class info(commands.Cog, name='Info'):
         await ctx.send(get_text(ctx.guild, 'info', 'info.is_support').format(ctx.author.name) + " :wink:")
 
 
-    @commandExtra(category="Bot Info", aliases=['botinfo', 'info'])
+    @commandExtra(category="Bot Info", aliases=['botinfo'])
     @commands.guild_only()
     async def about(self, ctx):
         """ About the bot """
