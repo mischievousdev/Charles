@@ -52,8 +52,8 @@ class HelpCommand(commands.HelpCommand):
 
         cogs = ""
         for extension in self.context.bot.cogs.values():
-            if self.context.author != self.context.bot.owner and not extension.commands or extension.qualified_name.upper() in self.owner_cogs:
-                    continue
+            if self.context.author != self.context.bot.owner and extension.qualified_name.upper() in self.owner_cogs:
+                continue
             if self.context.author == self.context.bot.owner and extension.qualified_name in self.ignore_cogs :
                 continue
             cogs += f"- {extension.icon} {extension.qualified_name}\n"
