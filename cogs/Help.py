@@ -20,13 +20,12 @@ class HelpCommand(commands.HelpCommand):
         self.owner_cogs = ['OWNER', 'JISHAKU', 'EVENTS', 'DBL', 'TEST', 'ECONOMY']
         self.ignore_cogs = ["Help", "DBL", "Events", "Test"]
     
-    
     def get_command_signature(self, command):
-        return f"[{command.cog_name}] > {command.qualified_name}"
+        return f"[{command.cog.qualified_name}] > {command.qualified_name}"
     
     def common_command_formatting(self, emb, command):
         emb.title = self.get_command_signature(command)
-        cmd_brief = get_text(self.context.guild, f"{command.cog_name.lower()}_help", f"{command.name}_brief")
+        cmd_brief = get_text(self.context.guild, f"{command.cog.qualified_name.lower()}_help", f"{command.name}_brief")
         emb.set_thumbnail(url=command.cog.big_icon)
         try: # try to get as a grouped command, if error its not a group command
             emb.description = get_text(self.context.guild, f"{command.cog.qualified_name.lower()}_help", f"{command.parent}_{command.name}_description")
@@ -45,16 +44,17 @@ class HelpCommand(commands.HelpCommand):
         return emb
 
     async def send_bot_help(self, mapping):
+        owner = self.context.bot.owner
         emb = discord.Embed(color=self.context.bot.embed_color)
-        emb.description = get_text(self.context.guild, "help", "help.main_page.description").format(str(self.context.bot.owner))
+        emb.description = get_text(self.context.guild, "help", "help.main_page.description").format(owner)
         emb.set_thumbnail(url="https://cdn.discordapp.com/avatars/505532526257766411/d1cde11602889bd799dec9a82e29609f.webp?size=1024")
         emb.set_author(icon_url=self.context.author.avatar_url, name=self.context.author)
 
         cogs = ""
         for extension in self.context.bot.cogs.values():
-            if self.context.author != self.context.bot.owner and extension.qualified_name.upper() in self.owner_cogs:
-                continue
-            if self.context.author == self.context.bot.owner and extension.qualified_name in self.ignore_cogs :
+            if self.context.author != owner and not extension.commands or extension.qualified_name.upper() in owner_cogs:
+                    continue
+            if self.context.author == owner and extension.qualified_name in self.ignore_cogs :
                 continue
             cogs += f"- {extension.icon} {extension.qualified_name}\n"
 
@@ -78,6 +78,7 @@ class HelpCommand(commands.HelpCommand):
     
     async def send_group_help(self, group):
         formatted = self.common_command_formatting(discord.Embed(color=discord.Color.from_rgb(54,57,62)), group)
+        sub_cmd_list = ""
         for group_command in group.commands:
             try:
                 sub_cmd_list += f"`╚╡` **{group_command.name}** - {get_text(self.context.guild, f'{group.cog.qualified_name.lower()}_help', f'{group_command.parent}_{group_command.name}_brief')}\n"
@@ -91,13 +92,13 @@ class HelpCommand(commands.HelpCommand):
         if (cog.qualified_name.upper() in self.owner_cogs and not await self.context.bot.is_owner(self.context.author)) or cog.qualified_name.upper() in self.ignore_cogs:
             return
         pages = {}
-        for cmd in cog.get_commands():
+        for cmd in cog.commands:
             if not await self.context.bot.is_owner(self.context.author) and (cmd.hidden or cmd.category=="Hidden"):
                 continue
             if not cmd.category in pages:
                 pages[cmd.category] = "```asciidoc\n"
-            cmd_brief = get_text(self.context.guild, f"{cmd.cog_name.lower()}_help", f"{cmd.name}_brief")
-            pages[cmd.category] += f"{cmd.name}{' '*int(17-len(cmd.name))}:: {cmd_brief}\n"
+            cmd_brief = get_text(self.context.guild, f"{cog.qualified_name.lower()}_help", f"{command.name}_brief")
+            pages[cmd.category] += f"{command.name}{' '*int(17-len(command.name))}:: {cmd_brief}\n"
             if isinstance(cmd, commands.Group):
                 for group_command in cmd.commands:
                     try:
