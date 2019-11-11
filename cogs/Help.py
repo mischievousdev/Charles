@@ -21,7 +21,7 @@ class HelpCommand(commands.HelpCommand):
         self.ignore_cogs = ["Help", "DBL", "Events", "Test"]
     
     def get_command_signature(self, command):
-        return f"[{command.cog.qualified_name}] > {command.qualified_name}"
+        return f"[{command.cog.qualified_name.upper()}] > {command.qualified_name}"
     
     def common_command_formatting(self, emb, command):
         emb.title = self.get_command_signature(command)
@@ -43,6 +43,67 @@ class HelpCommand(commands.HelpCommand):
         emb.add_field(name=get_text(self.context.guild, "help", "help.command_help.aliases"), value=aliases)
         return emb
 
+    async def command_callback(self, ctx, *, command=None):
+        """|coro|
+
+        The actual implementation of the help command.
+
+        It is not recommended to override this method and instead change
+        the behaviour through the methods that actually get dispatched.
+
+        - :meth:`send_bot_help`
+        - :meth:`send_cog_help`
+        - :meth:`send_group_help`
+        - :meth:`send_command_help`
+        - :meth:`get_destination`
+        - :meth:`command_not_found`
+        - :meth:`subcommand_not_found`
+        - :meth:`send_error_message`
+        - :meth:`on_help_command_error`
+        - :meth:`prepare_help_command`
+        """
+        
+        await self.prepare_help_command(ctx, command)
+        bot = ctx.bot
+
+        if command is None:
+            mapping = self.get_bot_mapping()
+            return await self.send_bot_help(mapping)
+
+        # Check if it's a cog
+        cog = ctx.bot.get_cog(command.title())
+        if cog is not None:
+            return await self.send_cog_help(cog)
+
+        maybe_coro = discord.utils.maybe_coroutine
+
+        # If it's not a cog then it's a command.
+        # Since we want to have detailed errors when someone
+        # passes an invalid subcommand, we need to walk through
+        # the command group chain ourselves.
+        keys = command.split(' ')
+        cmd = ctx.bot.all_commands.get(keys[0])
+        if cmd is None:
+            string = await maybe_coro(self.command_not_found, self.remove_mentions(keys[0]))
+            return await self.send_error_message(string)
+
+        for key in keys[1:]:
+            try:
+                found = cmd.all_commands.get(key)
+            except AttributeError:
+                string = await maybe_coro(self.subcommand_not_found, cmd, self.remove_mentions(key))
+                return await self.send_error_message(string)
+            else:
+                if found is None:
+                    string = await maybe_coro(self.subcommand_not_found, cmd, self.remove_mentions(key))
+                    return await self.send_error_message(string)
+                cmd = found
+
+        if isinstance(cmd, commands.Group):
+            return await self.send_group_help(cmd)
+        else:
+            return await self.send_command_help(cmd)
+
     async def send_bot_help(self, mapping):
         owner = self.context.bot.owner
         emb = discord.Embed(color=self.context.bot.embed_color)
@@ -52,8 +113,8 @@ class HelpCommand(commands.HelpCommand):
 
         cogs = ""
         for extension in self.context.bot.cogs.values():
-            if self.context.author != owner and not extension.commands or extension.qualified_name.upper() in owner_cogs:
-                    continue
+            if self.context.author != owner and extension.qualified_name.upper() in self.owner_cogs:
+                continue
             if self.context.author == owner and extension.qualified_name in self.ignore_cogs :
                 continue
             cogs += f"- {extension.icon} {extension.qualified_name}\n"
@@ -73,11 +134,11 @@ class HelpCommand(commands.HelpCommand):
         await self.context.send(embed=emb)
     
     async def send_command_help(self, command):
-        formatted = self.common_command_formatting(discord.Embed(color=discord.Color.from_rgb(54,57,62)), command)
+        formatted = self.common_command_formatting(discord.Embed(color=self.context.bot.embed_color), command)
         await self.context.send(embed=formatted)
     
     async def send_group_help(self, group):
-        formatted = self.common_command_formatting(discord.Embed(color=discord.Color.from_rgb(54,57,62)), group)
+        formatted = self.common_command_formatting(discord.Embed(color=self.context.bot.embed_color), group)
         sub_cmd_list = ""
         for group_command in group.commands:
             try:
@@ -85,20 +146,19 @@ class HelpCommand(commands.HelpCommand):
             except Exception:
                 sub_cmd_list += f"`╚╡` **{group_command.name}** - {get_text(self.context.guild, f'{group.cog.qualified_name.lower()}_help', f'{group_command.name}_brief')}\n"
         subcommands = get_text(self.context.guild, "help", "help.command_help.subcommands")
-        emb.add_field(name=subcommands, value=sub_cmd_list, inline=False)
+        formatted.add_field(name=subcommands, value=sub_cmd_list, inline=False)
         await self.context.send(embed=formatted)
     
     async def send_cog_help(self, cog):
         if (cog.qualified_name.upper() in self.owner_cogs and not await self.context.bot.is_owner(self.context.author)) or cog.qualified_name.upper() in self.ignore_cogs:
             return
         pages = {}
-        for cmd in cog.commands:
+        for cmd in cog.get_commands():
             if not await self.context.bot.is_owner(self.context.author) and (cmd.hidden or cmd.category=="Hidden"):
                 continue
             if not cmd.category in pages:
                 pages[cmd.category] = "```asciidoc\n"
-            cmd_brief = get_text(self.context.guild, f"{cog.qualified_name.lower()}_help", f"{command.name}_brief")
-            pages[cmd.category] += f"{command.name}{' '*int(17-len(command.name))}:: {cmd_brief}\n"
+            cmd_brief = get_text(self.context.guild, f"{cog.qualified_name.lower()}_help", f"{cmd.name}_brief")
             if isinstance(cmd, commands.Group):
                 for group_command in cmd.commands:
                     try:
@@ -109,10 +169,13 @@ class HelpCommand(commands.HelpCommand):
             else:
                 cmd_brief = get_text(self.context.guild, f"{cog.qualified_name.lower()}_help", f"{cmd.name}_brief")
                 pages[cmd.category] += f"{cmd.name}{' '*int(17-len(cmd.name))}:: {cmd_brief}\n"
+        for e in pages:
+            pages[e] += "```"
         formatted = []
         for name, cont in pages.items():
-            formatted.append(f"{name}\n{cont}")
+            formatted.append((name , cont))
         footer_text = get_text(self.context.guild, "help", "help.category_page.footer_info").format(self.context.prefix)
+        print(formatted)
         pages = FieldPages(self.context,
                            entries=formatted,
                            title = cog.qualified_name.upper(),

@@ -267,8 +267,9 @@ class FieldPages(Pages):
             else:
                 text = f' [{page}/{self.maximum_pages}]'
 
-            self.embed.set_footer(icon_url = self.footericon, text=self.footertext)
-            self.embed.set_thumbnail(url=self.thumbnail)
+        self.embed.set_footer(icon_url = self.footericon, text=self.footertext)
+        self.embed.set_thumbnail(url=self.thumbnail)
+        self.embed.title = self.title + text
 
 class TextPages(Pages):
     """Uses a commands.Paginator internally to paginate some text."""
