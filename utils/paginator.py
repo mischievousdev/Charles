@@ -261,15 +261,17 @@ class FieldPages(Pages):
         for key, value in entries:
             self.embed.add_field(name=key, value=value, inline=False)
         
+        self.embed.title = self.title
+
         if self.maximum_pages > 1:
             if self.show_entry_count:
                 text = f' [{page}/{self.maximum_pages}]'
             else:
                 text = f' [{page}/{self.maximum_pages}]'
+            self.embed.title = self.title + text
 
         self.embed.set_footer(icon_url = self.footericon, text=self.footertext)
         self.embed.set_thumbnail(url=self.thumbnail)
-        self.embed.title = self.title + text
 
 class TextPages(Pages):
     """Uses a commands.Paginator internally to paginate some text."""
