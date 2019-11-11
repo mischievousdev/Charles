@@ -159,6 +159,7 @@ class HelpCommand(commands.HelpCommand):
             if not cmd.category in pages:
                 pages[cmd.category] = "```asciidoc\n"
             cmd_brief = get_text(self.context.guild, f"{cog.qualified_name.lower()}_help", f"{cmd.name}_brief")
+            pages[cmd.category] += f"{cmd.name}{' '*int(17-len(cmd.name))}:: {cmd_brief}\n"
             if isinstance(cmd, commands.Group):
                 for group_command in cmd.commands:
                     try:
@@ -166,9 +167,6 @@ class HelpCommand(commands.HelpCommand):
                     except Exception:
                         cmd_brief = get_text(self.context.guild, f"{cog.qualified_name.lower()}_help", f"{group_command.name}_brief")
                     pages[cmd.category] += f"━ {group_command.name}{' '*int(15-len(group_command.name))}:: {cmd_brief}\n"
-            else:
-                cmd_brief = get_text(self.context.guild, f"{cog.qualified_name.lower()}_help", f"{cmd.name}_brief")
-                pages[cmd.category] += f"{cmd.name}{' '*int(17-len(cmd.name))}:: {cmd_brief}\n"
         for e in pages:
             pages[e] += "```"
         formatted = []
