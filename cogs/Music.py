@@ -168,10 +168,10 @@ class Player(wavelink.Player):
             description = description[:2040] + "..."
 
         song_info_embed.description = description +"\n⠀"
-        song_info_embed.add_field(name=get_text(ctx.guild, 'music', 'music.controller.upload_info'),
-                                  value=f"{get_text(ctx.guild, 'music', 'music.controller.uploader')} [{uploader_name}]({uploader_link})\n{get_text(ctx.guild, 'music', 'music.controller.upload_date')} {date_month}/{date_day}/{date_year}\n⠀")
         song_info_embed.add_field(name=get_text(ctx.guild, 'music', 'music.controller.other'),
                                   value=f"**{get_text(ctx.guild, 'music', 'music.controller.categories')}**\n{categories}\n\n**{get_text(ctx.guild, 'music', 'music.controller.tags')}**\n{tags}\n\n👀 {get_text(ctx.guild, 'music', 'music.controller.views')} {views:,}\n<:upvote:596577438461591562> {get_text(ctx.guild, 'music', 'music.controller.likes')} {likes:,}\n<:downvote:596577438952062977> {get_text(ctx.guild, 'music', 'music.controller.dislikes')} {dislikes:,}\n⭐ {get_text(ctx.guild, 'music', 'music.controller.rating')} {average_rating}")
+        song_info_embed.add_field(name=get_text(ctx.guild, 'music', 'music.controller.upload_info'),
+                                  value=f"{get_text(ctx.guild, 'music', 'music.controller.uploader')} [{uploader_name}]({uploader_link})\n{get_text(ctx.guild, 'music', 'music.controller.upload_date')} {date_month}/{date_day}/{date_year}\n⠀")
 
         return song_info_embed
 
