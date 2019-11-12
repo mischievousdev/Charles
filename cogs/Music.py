@@ -1242,6 +1242,9 @@ class Music(commands.Cog, name="Music"):
         with open(f'db/Playlists/{ctx.author.id}.json', "r") as f: # It exists! Let's open it
             data = json.load(f)
 
+        if not playlist in data["Playlists"]:
+            return await ctx.send(get_text(ctx.guild, 'music', 'music.pl.not_exist'))
+
         # Check if playlist exists
         if not tracks[0].title in data["Playlists"][playlist]:
             return await ctx.send(get_text(ctx.guild, 'music', 'music.pl.song_not_found'))

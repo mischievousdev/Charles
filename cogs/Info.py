@@ -404,7 +404,7 @@ class info(commands.Cog, name='Info'):
                         #centered = "⠀"*int(27 - len(boosts)/2) + boosts
                         boostmsg += f"\n{boosts}"
 
-                    embed.add_field(name=get_text(ctx.guild, 'info', 'info.boosts'), value=boostmsg)
+                    embed.add_field(name=get_text(ctx.guild, 'info', 'info.boosts'), value=boostmsg, inline=False)
                 else:
                     embed.add_field(name=get_text(ctx.guild, 'info', 'info.boosts'), value=f"{'⠀'*18} {get_text(ctx.guild, 'info', 'info.no_boosts')} \n`{'⠀'*50}`\n⠀|  ⠀⠀⠀⠀⠀|  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀|\nLvl 1⠀⠀⠀Lvl 2⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀Lvl 3\n{'⠀'*14}Next level in 2 boosts') #.format('⠀'*21, '⠀'*50, '⠀'*14)")
             else:
