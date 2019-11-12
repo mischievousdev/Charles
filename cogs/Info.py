@@ -434,11 +434,12 @@ class info(commands.Cog, name='Info'):
 
         embed.add_field(name=get_text(ctx.guild, 'info', 'info.name'), value=user, inline=True)
         embed.add_field(name=get_text(ctx.guild, 'info', 'info.nick'), value=user.nick if hasattr(user, "nick") else get_text(ctx.guild, 'info', 'info.none'), inline=True)
-        embed.add_field(name=get_text(ctx.guild, 'info', 'info.acc_created'), value=default.date(user.created_at), inline=True)
-        embed.add_field(name=get_text(ctx.guild, 'info', 'info.user_id'), value=user.id)
-        embed.add_field(name=get_text(ctx.guild, 'info', 'info.bot'), value=user.bot)
-        embed.add_field(name=get_text(ctx.guild, 'info', 'info.joined_server'), value=default.date(user.joined_at), inline=True)
         embed.add_field(name=get_text(ctx.guild, 'info', 'info.shared'), value=shared)
+        embed.add_field(name=get_text(ctx.guild, 'info', 'info.user_id'), value=user.id)
+        embed.add_field(name=get_text(ctx.guild, 'info', 'info.joined_server'), value=default.date(user.joined_at), inline=True)
+        embed.add_field(name=get_text(ctx.guild, 'info', 'info.bot'), value=user.bot)
+        embed.add_field(name=get_text(ctx.guild, 'info', 'info.status'), value=f"**{get_text(ctx.guild, 'info', 'info.status.mobile')}:** {user.mobile_status}\n**{get_text(ctx.guild, 'info', 'info.status.desktop')}:** {user.desktop_status}\n**{get_text(ctx.guild, 'info', 'info.status.web')}:** {user.web_status}")
+        embed.add_field(name=get_text(ctx.guild, 'info', 'info.acc_created'), value=default.date(user.created_at), inline=True)
         embed.add_field(name=get_text(ctx.guild, 'info', 'info.avatar'), value=f"[{get_text(ctx.guild, 'info', 'info.click')}]({user.avatar_url})")
 
         acknowledgements = []
@@ -473,7 +474,6 @@ class info(commands.Cog, name='Info'):
                 contributor = "<:contribution:643397975732912142> Contributor"
                 acknowledgements.append(contributor)
 
-        embed.add_field(name=get_text(ctx.guild, 'info', 'info.status'), value=f"**{get_text(ctx.guild, 'info', 'info.status.mobile')}:** {user.mobile_status}\n**{get_text(ctx.guild, 'info', 'info.status.desktop')}:** {user.desktop_status}\n**{get_text(ctx.guild, 'info', 'info.status.web')}:** {user.web_status}")
         if acknowledgements:
             embed.add_field(name=get_text(ctx.guild, 'info', 'info.acknowledgements'), value="\n".join(acknowledgements))
 
@@ -487,8 +487,7 @@ class info(commands.Cog, name='Info'):
 
         embed.add_field(
             name=get_text(ctx.guild, 'info', 'info.roles'),
-            value=', '.join([f"<@&{x}>" for x in userroles]) if len(user.roles) > 1 else get_text(ctx.guild, 'info', 'info.none'),
-            inline=False
+            value=', '.join([f"<@&{x}>" for x in userroles]) if len(user.roles) > 1 else get_text(ctx.guild, 'info', 'info.none')
         )
 
         await ctx.send(content="<:info:603362826358095922> " + get_text(ctx.guild, 'info', 'info.info_about').format(user), embed=embed)

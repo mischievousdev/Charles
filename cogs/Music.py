@@ -959,7 +959,7 @@ class Music(commands.Cog, name="Music"):
         embed = discord.Embed(color=self.bot.embed_color, description='<:equalizer:607008433081942016> ' + get_text(ctx.guild, 'music', 'music.eq_set').format(eq.capitalize()))
         await ctx.send(embed=embed, delete_after=25)
 
-    @checks.has_voted()
+    #@checks.has_voted()
     @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True)
     @commandExtra(name="seek", category="Player Controls")
     async def seek(self, ctx, time:int):
