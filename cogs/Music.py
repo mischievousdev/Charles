@@ -17,7 +17,7 @@ import os
 from utils import checks
 from collections import deque
 from discord.ext import commands
-from typing import Union
+from typing import Union, Optional
 from functools import partial
 from utils.checks import music_check
 from utils.translate import get_text
@@ -590,6 +590,28 @@ class Music(commands.Cog, name="Music"):
             await ctx.send(embed=embed, delete_after=15)
             await player.queue.put(Track(track.id, track.info, ctx=ctx))
 
+    @music_check(no_channel=True, bot_no_channel=True, same_channel=True)
+    @commandExtra(name="remove", category="Player Controls")
+    async def _remove(self, ctx, index: int):
+        """ Removes an item from the player's queue with the given index. """
+        player = self.bot.wavelink.get_player(ctx.guild.id, cls=Player)
+
+        upcoming = list(player.entries)
+
+        if not upcoming:
+            return await ctx.send(get_text(ctx.guild, 'music', 'music.no_queue'))
+
+        if index > len(upcoming) or index < 1:
+            return await ctx.send(get_text(ctx.guild, 'music', 'music.invalid_index').format(len(upcoming)))
+
+        removed = upcoming[index - 1]
+        player.queue._queue.remove(removed)  # Account for 0-index.
+
+        embed = discord.Embed(color=self.bot.embed_color)
+        embed.title = "<:music:600682025284010025> " + get_text(ctx.guild, 'music', 'music.queue_remove').format(removed.title)
+
+        await ctx.send(embed=embed, delete_after=15)
+
     @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True)
     @commandExtra(name='now_playing', aliases=['np', 'current', 'currentsong'], category="Player Information")
     async def now_playing(self, ctx):
@@ -1052,19 +1074,26 @@ class Music(commands.Cog, name="Music"):
         embed.description = fmt
         await ctx.send(embed=embed)
 
-    @groupExtra(aliases=['playlists', 'pl'], category="Playlists")
-    async def playlist(self, ctx):
+    @groupExtra(aliases=['playlists', 'pl'], category="Playlists", invoke_without_subcommand=True)
+    async def playlist(self, ctx, *, user:Optional[discord.User]=None):
         if ctx.invoked_subcommand is None:
 
+            if user is None:
+                user = ctx.author
+
             # Check if playlist exists
-            if not os.path.exists(f'/home/dutchy/Charles/db/Playlists/{ctx.author.id}.json'):
+            if not os.path.exists(f'/home/dutchy/Charles/db/Playlists/{user.id}.json'):
+                if user != ctx.author:
+                    return await ctx.send(get_text(ctx.guild, 'music', 'music.pl.user_no_playlists'))
                 return await ctx.send(get_text(ctx.guild, 'music', 'music.pl.no_playlists'))
 
-            with open(f'db/Playlists/{ctx.author.id}.json', "r") as f: # It exists! Let's open it
+            with open(f'db/Playlists/{user.id}.json', "r") as f: # It exists! Let's open it
                 data = json.load(f)
 
             # Check if there are any playlists available
             if not data["Playlists"]:
+                if user != ctx.author:
+                    return await ctx.send(get_text(ctx.guild, 'music', 'music.pl.user_no_playlists'))
                 return await ctx.send(get_text(ctx.guild, 'music', 'music.pl.no_playlists'))
 
             # Let's list the playlists
@@ -1073,7 +1102,7 @@ class Music(commands.Cog, name="Music"):
                 desc += f"`-` {playlist} ({len(data['Playlists'][playlist])} {str(get_text(ctx.guild, 'music', 'music.pl.song')) if len(data['Playlists'][playlist]) == 1 else str(get_text(ctx.guild, 'music', 'music.pl.songs'))})\n"
 
             embed=discord.Embed(color=self.bot.embed_color, title=get_text(ctx.guild, 'music', 'music.pl.playlists'))
-            embed.set_author(icon_url=ctx.author.avatar_url, name=ctx.author)
+            embed.set_author(icon_url=user.avatar_url, name=str(user))
             embed.description = desc
 
             await ctx.send(embed=embed)
@@ -1111,7 +1140,7 @@ class Music(commands.Cog, name="Music"):
 
         await ctx.send(get_text(ctx.guild, 'music', 'music.pl.created').format(name, ctx.prefix))
 
-    @playlist.command(aliases=['addsong'])
+    @playlist.command(name="add", aliases=['addsong'])
     async def add(self, ctx, playlist, *, song):
 
         # Check if playlist exists
@@ -1331,6 +1360,39 @@ class Music(commands.Cog, name="Music"):
 
         await ctx.send(embed=embed)
 
+    @playlist.command()
+    async def clone(self, ctx, user:discord.User, playlist:str):
+
+        # Check if author has a file
+        if not os.path.exists(f'/home/dutchy/Charles/db/Playlists/{ctx.author.id}.json'):
+            return await ctx.send(get_text(ctx.guild, 'music', 'music.pl.no_playlists')) 
+
+        with open(f'db/Playlists/{ctx.author.id}.json', "r") as f:
+            auth_data = json.load(f)
+
+        if len(auth_data["Playlists"]) == 10:
+            return await ctx.send(get_text(ctx.guild, 'music', 'music.pl.playlist_limit'))
+
+        # Check if user has a file
+        if not os.path.exists(f'/home/dutchy/Charles/db/Playlists/{user.id}.json'):
+            return await ctx.send(get_text(ctx.guild, 'music', 'music.pl.no_playlists')) 
+
+        with open(f'db/Playlists/{user.id}.json', "r") as f:
+            user_data = json.load(f)
+
+        # Check if playlist exists
+        if not playlist in user_data["Playlists"]:
+            return await ctx.send(get_text(ctx.guild, 'music', 'music.pl.user_not_found').format(user.name))
+
+        playlist_data = user_data["Playlists"][playlist]
+        playlist_length = len(user_data["Playlists"][playlist])
+
+        auth_data["Playlists"][playlist] = playlist_data
+
+        with open(f'db/Playlists/{ctx.author.id}.json', "w") as f:
+            json.dump(auth_data, f)
+
+        await ctx.send(get_text(ctx.guild, 'music', 'music.pl.cloned').format(playlist, str(playlist_length), user.name))
 
 def setup(bot):
     bot.add_cog(Music(bot))
