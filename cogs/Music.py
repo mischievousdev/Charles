@@ -1074,7 +1074,7 @@ class Music(commands.Cog, name="Music"):
         embed.description = fmt
         await ctx.send(embed=embed)
 
-    @groupExtra(aliases=['playlists', 'pl'], category="Playlists", invoke_without_subcommand=True)
+    @groupExtra(aliases=['playlists', 'pl'], category="Playlists", invoke_without_command=True)
     async def playlist(self, ctx, *, user:Optional[discord.User]=None):
         if ctx.invoked_subcommand is None:
 

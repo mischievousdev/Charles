@@ -44,10 +44,7 @@ class Events(commands.Cog, name="Events"):
     @commands.Cog.listener()
     async def on_command_error(self, ctx, err):
         if isinstance(err, errors.MissingRequiredArgument):
-            errormsg=discord.Embed(color=0xFF7070)
-            errormsg.add_field(name="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_mra_title"),
-                               value=get_text(ctx.guild, "events", "events.oce_mra_help").format(ctx.prefix))
-            await ctx.send(embed=errormsg)
+            await ctx.send_help(ctx.command)
 
         if isinstance(err, errors.BadArgument):
             errormsg=discord.Embed(color=0xFF7070)

@@ -33,7 +33,7 @@ class HelpCommand(commands.HelpCommand):
             emb.description = get_text(self.context.guild, f"{command.cog.qualified_name.lower()}_help", f"{command.name}_description")
         usage = get_text(self.context.guild, "help", "help.command_help.usage")
         try:
-            usg = get_text(self.context.guild, f"{command.cog.qualified_name.lower()}_help", f"{command.qualified_name}_usage")
+            usg = get_text(self.context.guild, f"{command.cog.qualified_name.lower()}_help", f"{command.name}_usage")
             emb.add_field(name=usage, value=f"{self.context.prefix}{command.qualified_name} " + usg)
         except KeyError:
             emb.add_field(name=usage, value=f"{self.context.prefix}{command.qualified_name}")
