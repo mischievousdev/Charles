@@ -109,8 +109,15 @@ class Events(commands.Cog, name="Events"):
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         # Check if we didnt blacklist the guild
-        guildblacklist = [516000491788959760, 515331058258935818]
-        if guild.id in guildblacklist:
+        logchannel = self.bot.get_channel(520047388950396928)
+
+        with open('db/guild_blacklist.json', 'r') as f:
+            d = json.load(f)
+
+        if guild.id in d["Blacklist"]:
+            e = discord.Embed(color=0xff6047, title="Attempted Invite", description=f"A blacklisted guild ({guild.name}) attempted to invite me.")
+            e.set_thumbnail(url=guild.icon_url)
+            await logchannel.send(embed=e)
             return await guild.leave()
         
         # Let's create their command enable/disable file
@@ -220,7 +227,6 @@ class Events(commands.Cog, name="Events"):
                 await to_send.send(msg)
 
         # Log the join
-        logchannel = self.bot.get_channel(520047388950396928)
         members = len(guild.members)
         tch = len(guild.text_channels)
         vch = len(guild.voice_channels)

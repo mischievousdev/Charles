@@ -61,6 +61,47 @@ class Owner(commands.Cog, name="Owner", command_attrs=dict(hidden=True)):
         # remove `foo`
         return content.strip('` \n')
 
+    @groupExtra(category="Settings")
+    async def guildblacklist(self, ctx):
+        if ctx.invoked_subcommand is None:
+            await ctx.send_help(ctx.command)
+
+    @guildblacklist.command(name="add")
+    async def guildblacklist_add(self, ctx, guild:int):
+        with open('db/guild_blacklist.json', 'r') as f:
+            d = json.load(f)
+
+        if guild in d["Blacklist"]:
+            return await ctx.send("This guild is already blacklisted!")
+
+        d["Blacklist"].append(guild)
+
+        with open('db/guild_blacklist.json', 'w') as f:
+            json.dump(d, f)
+
+        await ctx.send(f"Guild with ID `{guild}` has been added to the blacklist!")
+
+        try:
+            g = self.bot.get_guild(guild)
+            await g.leave()
+        except Exception:
+            pass
+
+    @guildblacklist.command(name="remove")
+    async def guildblacklist_remove(self, ctx, guild:int):
+        with open('db/guild_blacklist.json', 'r') as f:
+            d = json.load(f)
+
+        if not guild in d["Blacklist"]:
+            return await ctx.send("This guild is not blacklisted!")
+
+        d["Blacklist"].remove(guild)
+
+        with open('db/guild_blacklist.json', 'w') as f:
+            json.dump(d, f)
+
+        await ctx.send(f"Guild with ID `{guild}` has been removed from the blacklist!")
+
     @commandExtra(category="Other", name='git')
     async def git(self, ctx: commands.Context, pull_push, *, commit_msg=None):
         """
