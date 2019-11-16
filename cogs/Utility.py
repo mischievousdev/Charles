@@ -89,8 +89,10 @@ class utility(commands.Cog, name="Utility"):
             return False
 
         if isinstance(ctx.command, commandsPlus) or isinstance(ctx.command, GroupPlus):
-            if d["Guild_Info"]["Modules"][ctx.command.cog_name][ctx.command.category] == False:
+            if d["Guild_Info"]["Modules"][ctx.command.cog_name]["Categories"][ctx.command.category] == False:
                 return False
+            else:
+                return True
 
         else:
             return True
