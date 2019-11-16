@@ -131,6 +131,7 @@ class Events(commands.Cog, name="Events"):
         guild_db.write('{}')
         guild_db.close()
 
+
         with open(f"db/guilds/{str(guild.id)}.json", "r") as f:
             data = json.load(f)
 
@@ -144,6 +145,18 @@ class Events(commands.Cog, name="Events"):
         with open(f"db/guilds/{str(guild.id)}.json", "r") as f:
             data = json.load(f)
 
+        module_dict = {}
+        for c in self.bot.cogs.values():
+            cats = []
+            for cmd in c.walk_commands():
+                if isinstance(cmd, commandsPlus) or isinstance(cmd, GroupPlus):
+                    cats.append(cmd.category)
+            cd = {}
+            cats = list(set(cats))
+            for cat in cats:
+                cd[cat] = True
+            module_dict[c.qualified_name] = {"Toggle": True, "Categories": cd}
+
         # Have to build the base first!
         data["Guild_Info"]["Name"] = guild.name
         data["Guild_Info"]["ID"] = guild.id
@@ -152,6 +165,7 @@ class Events(commands.Cog, name="Events"):
         data["Guild_Info"]["Language"] = "EN"
         data["Guild_Info"]["Embed_Color"] = "0x307EC4"
         data["Guild_Info"]["Prefix"] = ["c?"]
+        data["Guild_Info"]["Modules"] = module_dict
         data["Guild_Logs"]["Moderation"] = {}
         data["Guild_Logs"]["MessageEdit"] = {}
         data["Guild_Logs"]["MessageDelete"] = {}

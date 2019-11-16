@@ -17,7 +17,7 @@ from utils import default, checks, permissions
 from utils import Nullify
 from utils import FuzzySearch
 from utils import cache
-from utils.default import commandExtra, groupExtra
+from utils.default import commandExtra, groupExtra, commandsPlus, GroupPlus
 from utils.testing import changePNGColor
 from utils.translate import get_text
 
@@ -74,6 +74,29 @@ class utility(commands.Cog, name="Utility"):
         else:
             self.languages = []
             print("No {}!".format(language_file))
+
+    async def bot_check(self, ctx):
+        if ctx.author == self.bot.owner:
+            return True
+
+        with open(f'db/guilds/{ctx.guild.id}.json', 'r') as f:
+            d = json.load(f)
+
+        if ctx.command.name == "help":
+            return True
+
+        if d["Guild_Info"]["Modules"][ctx.command.cog_name]["Toggle"] == False:
+            return False
+
+        if isinstance(ctx.command, commandsPlus) or isinstance(ctx.command, GroupPlus):
+            if d["Guild_Info"]["Modules"][ctx.command.cog_name][ctx.command.category] == False:
+                return False
+
+        else:
+            return True
+
+
+
 
 
     @commandExtra(category="Utility")

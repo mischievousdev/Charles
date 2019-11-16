@@ -153,7 +153,7 @@ class Images(commands.Cog, name="Images"):
                 r = await r.json()
         await ctx.send(embed=discord.Embed(color=self.bot.embed_color).set_image(url=r['url']))
 
-    @commandExtra(category="NSFW") 
+    @commandExtra(category="Nsfw") 
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def phcomment(self, ctx, *, comment: commands.clean_content(fix_channel_mentions=True, use_nicknames=True, escape_markdown=True)):
         """PronHub Comment Image"""

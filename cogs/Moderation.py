@@ -2,6 +2,7 @@ import discord
 import re
 import aiohttp
 import asyncio
+import argparse
 
 from io import BytesIO
 from discord.ext import commands
@@ -10,6 +11,10 @@ from collections import Counter
 from utils.translate import get_text
 from utils.default import commandExtra, groupExtra
 from utils import checks
+
+class Arguments(argparse.ArgumentParser):
+    def error(self, message):
+        raise RuntimeError(message)
 
 
 class moderation(commands.Cog, name="Moderation"):

@@ -72,6 +72,55 @@ class info(commands.Cog, name='Info'):
             pages.append(text[last:curr])
         return list(filter(lambda a: a != '', pages))
 
+    @commandExtra(category="Server Info")
+    async def categories(self, ctx):
+        with open(f'db/guilds/{ctx.guild.id}.json', 'r') as f:
+            d = json.load(f)
+
+        e = discord.Embed(color=self.bot.embed_color, title="**Category Settings**")
+
+        m_count = 0
+
+        for m in d["Guild_Info"]["Modules"]:
+            if m in ["Owner", "Help", "DBL", "Events", "Jishaku", "Settings", "Test", "Economy"]:
+                continue
+            if d["Guild_Info"]["Modules"][m]["Toggle"] == False:
+                continue
+            m_count += 1
+            toggles = ""
+            for x in d["Guild_Info"]["Modules"][m]["Categories"]:
+                if d["Guild_Info"]["Modules"][m]["Categories"][x] == False:
+                    toggles += f"<:slide_no:522874184720842768> {x}\n"
+                if d["Guild_Info"]["Modules"][m]["Categories"][x] == True:
+                    toggles += f"<:slide_yes:522874186042048522> {x}\n"
+            e.add_field(name=m, value=toggles)
+
+        if m_count == 0:
+            e.description = "All ***modules*** are disabled. Please enable at least **1** module to view the category settings!"
+
+        await ctx.send(embed=e)
+
+    @commandExtra(category="Server Info")
+    async def modules(self, ctx):
+        with open(f'db/guilds/{ctx.guild.id}.json', 'r') as f:
+            d = json.load(f)
+
+        e = discord.Embed(color=self.bot.embed_color, title="**Module Settings**")
+
+        desc = ""
+
+        for m in d["Guild_Info"]["Modules"]:
+            if m in ["Owner", "Help", "DBL", "Events", "Jishaku", "Settings", "Test"]:
+                continue
+            if d["Guild_Info"]["Modules"][m]["Toggle"] == False:
+                desc += f"<:slide_no:522874184720842768> {m}\n"
+            if d["Guild_Info"]["Modules"][m]["Toggle"] == True:
+                desc += f"<:slide_yes:522874186042048522> {m}\n"
+
+        e.description = desc
+
+        await ctx.send(embed=e)
+
     @commandExtra(aliases=['source'], category="Bot Info")
     async def sourcecode(self, ctx, *, command=None):
         '''Get the source code for any command.'''

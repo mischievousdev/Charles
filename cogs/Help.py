@@ -25,7 +25,6 @@ class HelpCommand(commands.HelpCommand):
     
     def common_command_formatting(self, emb, command):
         emb.title = self.get_command_signature(command)
-        cmd_brief = get_text(self.context.guild, f"{command.cog.qualified_name.lower()}_help", f"{command.name}_brief")
         emb.set_thumbnail(url=command.cog.big_icon)
         try: # try to get as a grouped command, if error its not a group command
             emb.description = get_text(self.context.guild, f"{command.cog.qualified_name.lower()}_help", f"{command.parent}_{command.name}_description")
@@ -105,6 +104,9 @@ class HelpCommand(commands.HelpCommand):
             return await self.send_command_help(cmd)
 
     async def send_bot_help(self, mapping):
+        with open(f'db/guilds/{self.context.guild.id}.json', 'r') as f:
+            d = json.load(f)
+
         owner = self.context.bot.owner
         emb = discord.Embed(color=self.context.bot.embed_color)
         emb.description = get_text(self.context.guild, "help", "help.main_page.description").format(owner)
@@ -116,6 +118,8 @@ class HelpCommand(commands.HelpCommand):
             if self.context.author != owner and extension.qualified_name.upper() in self.owner_cogs:
                 continue
             if self.context.author == owner and extension.qualified_name in self.ignore_cogs :
+                continue
+            if d["Guild_Info"]["Modules"][extension.qualified_name]["Toggle"] == False:
                 continue
             cogs += f"- {extension.icon} {extension.qualified_name}\n"
 
@@ -134,10 +138,29 @@ class HelpCommand(commands.HelpCommand):
         await self.context.send(embed=emb)
     
     async def send_command_help(self, command):
+        with open(f'db/guilds/{self.context.guild.id}.json', 'r') as f:
+            d = json.load(f)
+
+        if d["Guild_Info"]["Modules"][command.cog_name]["Toggle"] == False:
+            return await self.send_error_message(self.command_not_found(command.name))
+        if isinstance(command, commandsPlus):
+            if d["Guild_Info"]["Modules"][command.cog_name]["Categories"][command.category] == False:
+                return await self.send_error_message(self.command_not_found(command.name))
+
         formatted = self.common_command_formatting(discord.Embed(color=self.context.bot.embed_color), command)
         await self.context.send(embed=formatted)
     
     async def send_group_help(self, group):
+        with open(f'db/guilds/{self.context.guild.id}.json', 'r') as f:
+            d = json.load(f)
+
+        if d["Guild_Info"]["Modules"][group.cog_name]["Toggle"] == False:
+            return await self.send_error_message(self.command_not_found(group.name))
+        if isinstance(group, GroupPlus):
+            if d["Guild_Info"]["Modules"][group.cog_name]["Categories"][group.category] == False:
+                return await self.send_error_message(self.command_not_found(group.name))
+
+
         formatted = self.common_command_formatting(discord.Embed(color=self.context.bot.embed_color), group)
         sub_cmd_list = ""
         for group_command in group.commands:
@@ -152,9 +175,17 @@ class HelpCommand(commands.HelpCommand):
     async def send_cog_help(self, cog):
         if (cog.qualified_name.upper() in self.owner_cogs and not await self.context.bot.is_owner(self.context.author)) or cog.qualified_name.upper() in self.ignore_cogs:
             return
+        with open(f'db/guilds/{self.context.guild.id}.json', 'r') as f:
+            d = json.load(f)
+
+        if d["Guild_Info"]["Modules"][cog.qualified_name]["Toggle"] == False:
+            return
+
         pages = {}
         for cmd in cog.get_commands():
             if not await self.context.bot.is_owner(self.context.author) and (cmd.hidden or cmd.category=="Hidden"):
+                continue
+            if d["Guild_Info"]["Modules"][cog.qualified_name]["Categories"][cmd.category] == False:
                 continue
             if not cmd.category in pages:
                 pages[cmd.category] = "```asciidoc\n"
@@ -182,3 +213,6 @@ class HelpCommand(commands.HelpCommand):
                            footertext = footer_text,
                            per_page=1)
         await pages.paginate()
+
+    def command_not_found(self, string):
+        return 'No command called "{}" found.'.format(string)

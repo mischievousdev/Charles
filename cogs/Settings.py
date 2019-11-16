@@ -3,10 +3,13 @@ import json
 import os
 import datetime
 import random
+import re
 
 from discord.ext import commands
 from utils.default import commandExtra, groupExtra
 from utils.translate import get_text
+
+HEX = re.compile(r'^(#|0x)[A-Fa-f0-9]{6}$')
 
 class GuildSettings(commands.Cog, name="Settings"):
     def __init__(self, bot):
@@ -50,6 +53,89 @@ class GuildSettings(commands.Cog, name="Settings"):
 
         except FileNotFoundError:
             return False
+
+    @commands.has_permissions(administrator=True)
+    @commandExtra(name="toggle-category", aliases=['toggle-cat'], category="Settings")
+    async def toggle_category(self, ctx, module:str, *, category:str):
+        with open(f'db/guilds/{ctx.guild.id}.json', 'r') as f:
+            d = json.load(f)
+
+        if not module.title() in d["Guild_Info"]["Modules"]:
+            return await ctx.send("That's not a valid module!")
+
+        if module.title() in ["Owner", "Help", "DBL", "Events", "Jishaku", "Settings"]:
+            return await ctx.send("You can not toggle this module!")
+
+        if not category.title() in d["Guild_Info"]["Modules"][module.title()]["Categories"]:
+            return await ctx.send("That's not a valid category!")
+
+        count = 0
+        for x in d["Guild_Info"]["Modules"][module.title()]["Categories"]:
+            if d["Guild_Info"]["Modules"][module.title()]["Categories"][x] == True:
+                count += 1
+
+        if count == 1 and d["Guild_Info"]["Modules"][module.title()]["Categories"][category.title()] != False:
+            return await ctx.send("You need to have at least 1 category enabled. If you want all disabled, please disable the whole module using the `toggle-module` command!")
+
+
+        if d["Guild_Info"]["Modules"][module.title()]["Categories"][category.title()] == True:
+            d["Guild_Info"]["Modules"][module.title()]["Categories"][category.title()] = False
+            toggle = "off"
+        elif d["Guild_Info"]["Modules"][module.title()]["Categories"][category.title()] == False:
+            d["Guild_Info"]["Modules"][module.title()]["Categories"][category.title()] = True
+            toggle = "on"
+
+        with open(f"db/guilds/{ctx.guild.id}.json", "w") as f:
+            json.dump(d, f, indent=4)
+
+        await ctx.send(f"Category `{category.title()}` from module `{module.title()}` has been toggled **{toggle}**!")
+
+    @commands.has_permissions(administrator=True)
+    @commandExtra(name="toggle-module", category="Settings")
+    async def toggle_module(self, ctx, module:str):
+        with open(f'db/guilds/{ctx.guild.id}.json', 'r') as f:
+            d = json.load(f)
+
+        enabled = 0
+        disabled = 0
+        if module.lower() in ["*", "all"]:
+            for m in ["Fun", "Music", "Info", "Moderation", "Images", "Utility"]:
+                if d["Guild_Info"]["Modules"][m]["Toggle"] == True:
+                    enabled += 1
+                if d["Guild_Info"]["Modules"][m]["Toggle"] == False:
+                    disabled += 1
+
+            if enabled >= disabled:
+                for m in ["Fun", "Music", "Info", "Moderation", "Images", "Utility"]:
+                    d["Guild_Info"]["Modules"][m]["Toggle"] = False
+                    toggle = "off"
+            if disabled > enabled:
+                for m in ["Fun", "Music", "Info", "Moderation", "Images", "Utility"]:
+                    d["Guild_Info"]["Modules"][m]["Toggle"] = True
+                    toggle = "on"
+
+            with open(f"db/guilds/{ctx.guild.id}.json", "w") as f:
+                json.dump(d, f, indent=4)
+
+            return await ctx.send(f"All modules have been toggled **{toggle}**!")
+
+        if not module.title() in d["Guild_Info"]["Modules"]:
+            return await ctx.send("That's not a valid module!")
+
+        if module.title() in ["Owner", "Help", "DBL", "Events", "Jishaku", "Settings"]:
+            return await ctx.send("You can not toggle this module!")
+
+        if d["Guild_Info"]["Modules"][module.title()]["Toggle"] == True:
+            d["Guild_Info"]["Modules"][module.title()]["Toggle"] = False
+            toggle = "off"
+        elif d["Guild_Info"]["Modules"][module.title()]["Toggle"] == False:
+            d["Guild_Info"]["Modules"][module.title()]["Toggle"] = True
+            toggle = "on"
+
+        with open(f"db/guilds/{ctx.guild.id}.json", "w") as f:
+            json.dump(d, f, indent=4)
+
+        await ctx.send(f"Module `{module.title()}` has been toggled **{toggle}**!")
 
     @commandExtra(category="Server Backups", name="delete-backup")
     async def delete_backup(self, ctx, id:int):
@@ -899,6 +985,10 @@ class GuildSettings(commands.Cog, name="Settings"):
     @commands.has_permissions(administrator=True)
     @commandExtra(name='set-color', category="Settings")
     async def embed_color(self, ctx, color):
+
+        if not HEX.match(color):
+            return await ctx.send("That is not a valid HEX color! Please only use a `#******` or `0x******` HEX format!")
+
         with open(f"db/guilds/{ctx.guild.id}.json", "r") as f:
             data = json.load(f)
 
@@ -999,7 +1089,7 @@ class GuildSettings(commands.Cog, name="Settings"):
     async def disablecmd(self, ctx, *, command):
         """Disable the given command. A few important main commands have been blocked from disabling for obvious reasons"""
         file_name= "db/cmd_checks/" + str(ctx.guild.id) + ".json"
-        cant_disable = ["help", "jishaku", "disable-command", "enable-command"]
+        cant_disable = ["help", "jishaku", "disable-command", "enable-command", "toggle-module", "toggle-category", "modules", "categories"]
         cmd = self.bot.get_command(command)
 
         with open(file_name, "r") as f:
