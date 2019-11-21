@@ -206,6 +206,7 @@ class HelpCommand(commands.HelpCommand):
         footer_text = get_text(self.context.guild, "help", "help.category_page.footer_info").format(self.context.prefix)
         print(formatted)
         pages = FieldPages(self.context,
+                           embed_color=self.context.bot.embed_color,
                            entries=formatted,
                            title = cog.qualified_name.upper(),
                            thumbnail = cog.big_icon,
