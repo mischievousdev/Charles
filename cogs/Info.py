@@ -597,6 +597,8 @@ class info(commands.Cog, name='Info'):
                             f"{get_text(ctx.guild, 'info', 'info.total')}:⠀{len(unique_members)}\n")
         embed.add_field(name=get_text(ctx.guild, 'info', 'info.chan'), value=f"<:channel:585783907841212418> {text}\n<:voice:585783907673440266> {voice}")
         embed.add_field(name=get_text(ctx.guild, 'info', 'info.created'), value=f"{default.date(self.bot.user.created_at)}\n({default.timeago(datetime.utcnow() - self.bot.user.created_at)})")
+        embed.set_image(url="https://media.discordapp.net/attachments/647604857544638468/647606721954447360/Devision.png?width=1443&height=249")
+        embed.set_footer(text="Charles is one of the bots created by Devision.")
         await ctx.send(embed=embed)
 
     @commandExtra(category="Bot Info", aliases=['joinme', 'botinvite'])

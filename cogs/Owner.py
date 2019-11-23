@@ -61,6 +61,14 @@ class Owner(commands.Cog, name="Owner", command_attrs=dict(hidden=True)):
         # remove `foo`
         return content.strip('` \n')
 
+    @commandExtra(name="project-info", category="Other")
+    async def project_info(self, ctx):
+        await ctx.message.delete()
+        e = discord.Embed(color=self.bot.embed_color, title="Charles")
+        e.set_thumbnail(url=self.bot.user.avatar_url_as(format="png"))
+        e.description = "Charles is my main bot. He is made for everyone who does not like having 1 bot for each category. Charles is an amazing multi-purpose bot with many functions. He is also made to be very customizable.  Other than that, Charles is completely modular. Meaning that you can completely disable each module and category! Charles can provide you with some good music, moderation, fun, image manipulation and much more."
+        await ctx.send(embed=e)
+
     @groupExtra(category="Settings")
     async def guildblacklist(self, ctx):
         if ctx.invoked_subcommand is None:
