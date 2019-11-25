@@ -325,6 +325,12 @@ class info(commands.Cog, name='Info'):
 
         embed.add_field(name=f"__**{get_text(ctx.guild, 'info', 'info.credits.bot_artist')}:**__\n\n", value=badesc)
 
+        tom = self.bot.get_user(547861735391100931)
+
+        contdesc = f"- **{tom}**"
+
+        embed.add_field(name="__**Notable Contributors:**__", value=contdesc)
+
         await ctx.send(embed=embed)
 
     @commandExtra(category="Bot Info")
@@ -557,7 +563,7 @@ class info(commands.Cog, name='Info'):
     async def support(self, ctx):
         """ Get an invite to our support server! """
         if isinstance(ctx.channel, discord.DMChannel) or ctx.guild.id != 514232441498763279:
-            return await ctx.send(embed=discord.Embed(color=self.bot.embed_color).set_author(name=get_text(ctx.guild, 'info', 'info.support'), icon_url=self.bot.get_guild(514232441498763279).icon_url, url="https://discord.gg/wZSH7pz"))
+            return await ctx.send(embed=discord.Embed(color=self.bot.embed_color).set_author(name=get_text(ctx.guild, 'info', 'info.support'), icon_url=self.bot.get_guild(514232441498763279).icon_url, url="https://discord.gg/reQttPM"))
 
         await ctx.send(get_text(ctx.guild, 'info', 'info.is_support').format(ctx.author.name) + " :wink:")
 
