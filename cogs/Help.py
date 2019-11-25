@@ -17,8 +17,8 @@ class HelpCommand(commands.HelpCommand):
         with open("db/config.json", "r") as f:
             self.data = json.load(f)
 
-        self.owner_cogs = ['OWNER', 'JISHAKU', 'EVENTS', 'DBL', 'TEST', 'ECONOMY']
-        self.ignore_cogs = ["Help", "DBL", "Events", "Test"]
+        self.owner_cogs = ['OWNER', 'JISHAKU', 'EVENTS', 'DBL', 'TEST', 'ECONOMY', 'YTT']
+        self.ignore_cogs = ["Help", "DBL", "Events", "Test", "YTT"]
     
     def get_command_signature(self, command):
         return f"[{command.cog.qualified_name.upper()}] > {command.qualified_name}"
