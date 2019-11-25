@@ -781,7 +781,7 @@ class Music(commands.Cog, name="Music"):
         await player.stop()
 
     @music_check(no_channel=True, bot_no_channel=True, same_channel=True)
-    @commandExtra(name='stop', category="Player Controls")
+    @commandExtra(name='stop', category="Player Controls", aliases=["dc","disconnect"])
     @commands.cooldown(3, 30, commands.BucketType.guild)
     async def stop_(self, ctx):
         """Stop the player, disconnect and clear the queue.
