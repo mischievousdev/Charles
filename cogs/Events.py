@@ -281,7 +281,7 @@ class Events(commands.Cog, name="Events"):
         log_mention = True
 
         # User is blacklisted from our dms
-        blacklisteddms = [514849447646199819, 514609909556314123]
+        blacklisteddms = [514849447646199819, 514609909556314123, 300735059080511488]
         if not message.guild and message.author.id in blacklisteddms:
             blockeddm=discord.Embed(description="<:banhammer:523695899726053377> **BANNED!**", color=0xff1414)
             blockeddm.set_footer(text="You have been blocked from my dm's. If you want to appeal your ban, contact my owner! | Dutchy#6127")
@@ -307,16 +307,16 @@ class Events(commands.Cog, name="Events"):
         # If the message was only a mention, send prefix(es)
         if message.content == "<@505532526257766411>" or message.content == "<@!505532526257766411>":
             log_mention = False
-            with open("db/prefixes.json", "r") as f:
+            with open(f"db/guilds/{message.guild.id}.json", "r") as f:
                 data = json.load(f)
 
-            if len(data[str(message.guild.id)]) == 1:
-                pre = '`, `'.join(data[str(message.guild.id)])
-                await message.channel.send(get_text(ctx.guild, "settings", "settings.prefix").format(pre))
+            if len(data["Guild_Info"]["Prefix"]) == 1:
+                pre = '`, `'.join(data["Guild_Info"]["Prefix"])
+                await message.channel.send(get_text(message.guild, "settings", "settings.prefix").format(pre))
             
-            if len(data[str(ctx.guild.id)]) >= 1:
-                pre = '`, `'.join(data[str(ctx.guild.id)])
-                await message.channel.send(get_text(ctx.guild, "settings", "settings.prefixes").format(pre))
+            if len(data["Guild_Info"]["Prefix"]) > 1:
+                pre = '`, `'.join(data["Guild_Info"]["Prefix"])
+                await message.channel.send(get_text(message.guild, "settings", "settings.prefixes").format(pre))
 
 
         # We were mentioned, let's log that too
