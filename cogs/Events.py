@@ -41,6 +41,18 @@ class Events(commands.Cog, name="Events"):
     @commands.Cog.listener()
     async def on_command(self, ctx):
         print(f"{ctx.guild.name} | {ctx.author} > {ctx.message.content}")
+
+    @commands.Cog.listener()
+    async def on_command_completion(self, ctx):
+        if ctx.command.parent:
+            cmd = f'{ctx.command.parent} {ctx.command.name}'
+        else:
+            cmd = ctx.command.name
+
+        if not cmd in self.bot.cmdUsage:
+            self.bot.cmdUsage[cmd] = 1
+        else:
+            self.bot.cmdUsage[cmd] += 1
     
     @commands.Cog.listener()
     async def on_command_error(self, ctx, err):
@@ -251,7 +263,7 @@ class Events(commands.Cog, name="Events"):
             if discord.emoji:
                 all += str(emoji)
 
-        e=discord.Embed(title="Joined a new guild!", color=0x67dba3)
+        e=discord.Embed(title="Joined a new guild!", color=self.bot.embed_color)
         e.set_thumbnail(url=guild.icon_url)
         e.description=f"**Guild name:** {guild.name}\n**Guild owner:** {owner}\n**Guild ID:** {guild.id}\n\n{members} members\n{tch} text channels\n{vch} voice channels\n\n__**Custom emoji:**__\n{all}"
         await logchannel.send(embed=e)
@@ -264,7 +276,13 @@ class Events(commands.Cog, name="Events"):
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         logchannel = self.bot.get_channel(520047388950396928)
-        await logchannel.send(f"Left a guild... Guild name: {guild.name}")
+
+        members = len(guild.members)
+
+        e=discord.Embed(title="Left a guild...", color=self.bot.embed_color)
+        e.set_thumbnail(url=guild.icon_url)
+        e.description=f"**Guild name:** {guild.name}\n{members} members"
+        await logchannel.send(embed=e)
 
         # Remove their database files
         os.remove(f'db/cmd_checks/{str(guild.id)}.json')
@@ -281,7 +299,7 @@ class Events(commands.Cog, name="Events"):
         log_mention = True
 
         # User is blacklisted from our dms
-        blacklisteddms = [514849447646199819, 514609909556314123, 300735059080511488]
+        blacklisteddms = [514849447646199819, 514609909556314123]
         if not message.guild and message.author.id in blacklisteddms:
             blockeddm=discord.Embed(description="<:banhammer:523695899726053377> **BANNED!**", color=0xff1414)
             blockeddm.set_footer(text="You have been blocked from my dm's. If you want to appeal your ban, contact my owner! | Dutchy#6127")
