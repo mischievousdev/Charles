@@ -151,6 +151,7 @@ class Events(commands.Cog, name="Events"):
         data["Guild_Info"] = {}
         data["Guild_Logs"] = {}
         data["Economy"] = {}
+        data["RR"] = {}
 
         with open(f"db/guilds/{str(guild.id)}.json", "w") as f:
             data = json.dump(data, f, indent=4)

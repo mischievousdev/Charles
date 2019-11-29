@@ -97,9 +97,259 @@ class utility(commands.Cog, name="Utility"):
         else:
             return True
 
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload):
+        with open(f'db/guilds/{payload.guild_id}.json', 'r') as f:
+            d = json.load(f)
+
+        guild = self.bot.get_guild(payload.guild_id)
+        user = guild.get_member(payload.user_id)
+
+        if str(payload.message_id) in d["RR"]:
+            if str(payload.emoji) in d["RR"][str(payload.message_id)]:
+                role = guild.get_role(d["RR"][str(payload.message_id)][str(payload.emoji)])
+                await user.add_roles(role) 
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_remove(self, payload):
+        with open(f'db/guilds/{payload.guild_id}.json', 'r') as f:
+            d = json.load(f)
+
+        guild = self.bot.get_guild(payload.guild_id)
+        user = guild.get_member(payload.user_id)
+
+        if str(payload.message_id) in d["RR"]:
+            if str(payload.emoji) in d["RR"][str(payload.message_id)]:
+                role = guild.get_role(d["RR"][str(payload.message_id)][str(payload.emoji)])
+                await user.remove_roles(role) 
+
+    @commands.has_permissions(manage_messages=True, manage_roles=True)
+    @commandExtra(aliases=['reactionrole', 'rr'], category="Utility")
+    async def reactionroles(self, ctx):
+        with open(f'db/guilds/{ctx.guild.id}.json', 'r') as r:
+            d = json.load(r)
+
+        embed_opt = False
+
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel
+
+        await ctx.send("Do you want to use an existing message or do you want me to make a new one? `new` | `existing`")
+
+        msg_opt = False
+        check1 = False
+        while check1 != True:
+            try:
+                msg = await self.bot.wait_for('message', check=check, timeout=60)
+
+                if msg.content.lower() == "new":
+                    await ctx.send("Ok, I'll make a new one!", delete_after=5)
+                    msg_opt = True
+                    check1 = True
+                elif msg.content.lower() == "existing":
+                    await ctx.send("Alright, let's use an existing message.", delete_after=5)
+                    check1 = True
+                else:
+                    await ctx.send("Invalid option given, please try again.", delete_after=5)
+
+            except asyncio.TimeoutError:
+                return await ctx.send("Timed out, cancelling command.")
+
+        if msg_opt == True:
+            await ctx.send("Do you want it in an embed? `yes` | `no`\n\n*if you choose for embed, the roles will be mentions as they don't ping in an embed. In a normal message it will be the role name.*")
+
+            check2 = False
+            while check2 != True:
+                try:
+                    embed = await self.bot.wait_for('message', check=check, timeout=60)
+
+                    if embed.content.lower() == "yes":
+                        await ctx.send("Ok, great!", delete_after=5)
+                        embed_opt = True
+                        check2 = True
+                    elif embed.content.lower() == "no":
+                        await ctx.send("Alright, normal message it is.", delete_after=5)
+                        check2 = True
+                    else:
+                        await ctx.send("Invalid option given, please try again.", delete_after=5)
+
+                except asyncio.TimeoutError:
+                    return await ctx.send("Timed out, cancelling command.")
+        else:
+            pass
+
+        done = False
+        emoji_check = False
+        role_check = True
+
+        emoji_dict = {}
+        addmsg = ""
+
+        while done != True:
+            try:
+                if len(emoji_dict) == 20:
+                    done = True
+                else:
+                    await ctx.send(f"Please send **one** emoji you want to use! {addmsg}")
+                    emoji_check = False
+                    role_check = True
+                    emoji_msg = await self.bot.wait_for('message', check=check, timeout=60)
+
+                if emoji_msg.content.lower() == "cancel" and len(emoji_dict) >= 1:
+                    await ctx.send("Alright, so that's all set up now.", delete_after=5)
+                    done = True
+
+                if emoji_msg.content in emoji_dict.keys():
+                    await ctx.send("Already using that emoji for reaction roles in this message!", delete_after=5)
+                    emoji_check = True
 
 
+                if done != True and emoji_check != True and role_check != False:
+                    try:
+                        await emoji_msg.add_reaction(str(emoji_msg.content))
+                        await ctx.send("Ok, let's use that emoji!", delete_after=5)
 
+                        try:
+                            await ctx.send("Now please send the role name/mention/id for the role you want to set for that emoji.")
+                            role_msg = await self.bot.wait_for('message', check=check, timeout=60)
+
+                            role = await commands.RoleConverter().convert(ctx, role_msg.content)
+
+                            if role.id in emoji_dict.values():
+                                await ctx.send("Already using that role for reaction roles in this message, please try again.", delete_after=5)
+                                role_check = False
+
+                            if role_check != False:
+                                if role.position >= ctx.guild.me.top_role.position:
+                                    await ctx.send("I could not set that as a reaction role. The position of that role is higher than or equal to my top role!", delete_after=5)
+                                else:
+                                    await ctx.send(f"The role `{role.name}` has been set as reaction role for {str(emoji_msg.content)}")
+                                    emoji_dict[str(emoji_msg.content)] = role.id
+
+                                    if addmsg == "":
+                                        addmsg += "Say `cancel` if you're done"
+
+                        except asyncio.TimeoutError:
+                            return await ctx.send("Timed out, cancelling command.")
+
+                        except Exception:
+                            await ctx.send("I could not find that role. Restarting...", delete_after=5)
+
+                    except Exception:
+                        await ctx.send("I could not find that emoji, make sure I am in the same server this emoji is from!", delete_after=5)
+
+            except asyncio.TimeoutError:
+                return await ctx.send("Timed out, cancelling command.")
+
+        total = ""
+        for k, v in emoji_dict.items():
+            total += f"{k} | <@&{v}>\n"
+
+        await ctx.send(content="Here's the result:", embed=discord.Embed(color=0x36393E, description=total))
+
+        await asyncio.sleep(2)
+
+        if msg_opt == True:
+
+            await ctx.send("Please send the channel mention/ID/name where you want the message to be.")
+            check3 = False
+            while check3 != True:
+                try:
+                    chan_msg = await self.bot.wait_for('message', check=check, timeout=60)
+                    channel = await commands.TextChannelConverter().convert(ctx, chan_msg.content)
+                    
+                    if channel != None:
+                        if channel.permissions_for(ctx.guild.me).send_messages == True:
+                            await ctx.send(f"Alright, message will be sent to {channel.mention}!", delete_after=5)
+                            check3 = True
+                        else:
+                            await ctx.send("I do not have permissions to send messages in that channel.", delete_after=5)
+                    else:
+                        await ctx.send("I could not find that channel.", delete_after=5)
+
+                except asyncio.TimeoutError:
+                    return await ctx.send("Timed out, cancelling command.")
+
+                except Exception:
+                    await ctx.send("I could not find that channel, please try again.", delete_after=5)
+
+            if embed_opt == True:
+
+                await ctx.send("If you want to set a custom title for the embed, please say it now. Say \"None\" to set it to the default title (\"Reaction Roles\").")
+                try:
+                    title_msg = await self.bot.wait_for('message', check=check, timeout=60)
+                    if title_msg.content.lower() == "none":
+                        title = "Reaction Roles"
+                    else:
+                        title = title_msg.content
+                except asyncio.TimeoutError:
+                    return await ctx.send("Timed out, cancelling command.")
+
+                e = discord.Embed(color=self.bot.embed_color, title=title)
+                e.set_footer(text="React with an emoji to get the corresponding role!")
+                e.description = total
+                rrmsg = await channel.send(embed=e)
+                for k in emoji_dict.keys():
+                    await rrmsg.add_reaction(k)
+
+            elif embed_opt == False:
+                msg = "React with an emoji to get the corresponding role!\n\n"
+                for k, v in emoji_dict.items():
+                    msg += f"{k} | {ctx.guild.get_role(v).name}\n"
+                rrmsg = await channel.send(msg)
+                for k in emoji_dict.keys():
+                    await rrmsg.add_reaction(k)
+
+        elif msg_opt == False:
+            await ctx.send("Please send the **channel ID/mention/name** of the channel the message is in you want to use for these reaction roles!")
+            check4 = False
+            while check4 != True:
+                try:
+                    chan_msg = await self.bot.wait_for('message', check=check, timeout=60)
+                    channel = await commands.TextChannelConverter().convert(ctx, chan_msg.content)
+                    
+                    if channel != None:
+                        await ctx.send(f"Alright, message will be fetched from {channel.mention}!", delete_after=5)
+                        check4 = True
+                    else:
+                        await ctx.send("I could not find that channel.", delete_after=5)
+
+                except asyncio.TimeoutError:
+                    return await ctx.send("Timed out, cancelling command.")
+
+                except Exception:
+                    await ctx.send("I could not find that channel, please try again.", delete_after=5)
+
+            await ctx.send("Now please send the **message ID** from the message you want to use for reaction roles!")
+            check5 = False
+            while check5 != True:
+                try:
+                    message_msg = await self.bot.wait_for('message', check=check, timeout=60)
+                    rrmsg = await channel.fetch_message(int(message_msg.content))
+                    
+                    if rrmsg != None:
+                        if str(rrmsg.id) in d["RR"]:
+                            await ctx.send("I can not use that message for reaction roles as it already is being used for reaction roles!", delete_after=5)
+                        else:
+                            await ctx.send(f"Alright, I will use that message for reaction roles!", delete_after=5)
+                            check5 = True
+                    else:
+                        await ctx.send(f"I could not find that message in {channel.mention}...", delete_after=5)
+
+                except asyncio.TimeoutError:
+                    return await ctx.send("Timed out, cancelling command.")
+
+                except Exception:
+                    await ctx.send("I could not find that message, please try again.", delete_after=5)
+
+            for k in emoji_dict.keys():
+                await rrmsg.add_reaction(k)
+
+        await ctx.send("Everything has been set up, reaction roles are now set up!")
+        d["RR"][str(rrmsg.id)] = emoji_dict
+
+        with open(f'db/guilds/{ctx.guild.id}.json', 'w') as r:
+            json.dump(d, r, indent=4)
 
     @commandExtra(category="Utility")
     async def tinyurl(self, ctx, *, link: str):
