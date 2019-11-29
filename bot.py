@@ -67,6 +67,8 @@ class Charles(commands.AutoShardedBot):
         # Bot vars
         self.embed_color = 0xFE8000
         self.cmdUsage = {}
+        self.cmdUsers = {}
+        self.guildUsage = {}
         self.loop = asyncio.get_event_loop()
         self.andesite = andesite.Client(self)
         self.session = aiohttp.ClientSession(loop=self.loop)

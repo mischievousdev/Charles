@@ -53,6 +53,16 @@ class Events(commands.Cog, name="Events"):
             self.bot.cmdUsage[cmd] = 1
         else:
             self.bot.cmdUsage[cmd] += 1
+
+        if not str(ctx.author.id) in self.bot.cmdUsers:
+            self.bot.cmdUsers[str(ctx.author.id)] = 1
+        else:
+            self.bot.cmdUsers[str(ctx.author.id)] += 1
+
+        if not str(ctx.guild.id) in self.bot.guildUsage:
+            self.bot.guildUsage[str(ctx.guild.id)] = 1
+        else:
+            self.bot.guildUsage[str(ctx.guild.id)] += 1
     
     @commands.Cog.listener()
     async def on_command_error(self, ctx, err):
