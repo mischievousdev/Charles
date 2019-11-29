@@ -22,13 +22,14 @@ from functools import partial
 from utils.checks import music_check
 from utils.translate import get_text
 from utils.default import commandExtra, groupExtra
+from utils.paginator import Pages
 from youtube_dl import YoutubeDL
 from db import tokens
 
 RURL = re.compile(r'https?:\/\/(?:www\.)?.+')
 
 
-class Track(wavelink.Track):
+class Track(wavelink.Track): 
     __slots__ = ('requester', 'channel', 'message')
 
     def __init__(self, id_, info, *, ctx=None):
@@ -1324,13 +1325,16 @@ class Music(commands.Cog, name="Music"):
             await ctx.send(get_text(ctx.guild, 'music', 'music.pl.delete_cancel'))
 
     @playlist.command()
-    async def show(self, ctx, playlist, page:int=1):
+    async def show(self, ctx, user:Optional[discord.User]=None, *, playlist):
+
+        if user == None:
+            user = ctx.author
 
         # Check if playlist exists
-        if not os.path.exists(f'/home/dutchy/Charles/db/Playlists/{ctx.author.id}.json'):
+        if not os.path.exists(f'/home/dutchy/Charles/db/Playlists/{user.id}.json'):
             return await ctx.send(get_text(ctx.guild, 'music', 'music.pl.no_playlists')) 
 
-        with open(f'db/Playlists/{ctx.author.id}.json', "r") as f:
+        with open(f'db/Playlists/{user.id}.json', "r") as f:
             data = json.load(f)
 
         # Check if playlist exists
@@ -1338,27 +1342,23 @@ class Music(commands.Cog, name="Music"):
             return await ctx.send(get_text(ctx.guild, 'music', 'music.pl.not_found'))
 
         # Let's create the pages
-        song_count = 0
         song_list = []
         for song in data["Playlists"][playlist]:
             song_list.append(song)
-            song_count += 1
 
-        items_per_page = 15
-        pages = math.ceil(song_count / items_per_page)
+        queue_list = [] # Let's list the songs
+        for track in song_list:
+            queue_list.append(f'**[{track}]({data["Playlists"][playlist][track]["Info"]["uri"]})**')
 
-        start = (page - 1) * items_per_page
-        end = start + items_per_page
+        paginator = Pages(ctx,
+                          title=f"__Showing playlist:__ {playlist}",
+                          entries=queue_list,
+                          per_page = 15,
+                          embed_color=self.bot.embed_color,
+                          show_entry_count=False,
+                          author=user)
 
-        queue_list = '' # Let's list the songs
-        for index, track in enumerate(song_list[start:end], start=start):
-            queue_list += f'`{index + 1}.` **[{track}]({data["Playlists"][playlist][track]["Info"]["uri"]})**\n'
-
-        embed = discord.Embed(color=self.bot.embed_color, title=f"__Showing playlist:__ {playlist}", description=queue_list)
-        embed.set_footer(text=get_text(ctx.guild, 'music', 'music.queue_page').format(page, pages)) # Make sure they know what page they're on
-        embed.set_author(icon_url=ctx.author.avatar_url, name=ctx.author)
-
-        await ctx.send(embed=embed)
+        await paginator.paginate()
 
     @playlist.command()
     async def clone(self, ctx, user:discord.User, playlist:str):
@@ -1390,9 +1390,37 @@ class Music(commands.Cog, name="Music"):
         auth_data["Playlists"][playlist] = playlist_data
 
         with open(f'db/Playlists/{ctx.author.id}.json', "w") as f:
-            json.dump(auth_data, f)
+            json.dump(auth_data, f, indent=4)
 
         await ctx.send(get_text(ctx.guild, 'music', 'music.pl.cloned').format(playlist, str(playlist_length), user.name))
+
+    @playlist.command(name="shuffle")
+    async def pl_shuffle(self, ctx, *, playlist):
+        if not os.path.exists(f'/home/dutchy/Charles/db/Playlists/{ctx.author.id}.json'):
+            return await ctx.send(get_text(ctx.guild, 'music', 'music.pl.no_playlists')) 
+
+        with open(f'db/Playlists/{ctx.author.id}.json', "r") as f:
+            data = json.load(f)
+
+        if not playlist in data["Playlists"]:
+            return await ctx.send(get_text(ctx.guild, 'music', 'music.pl.not_found'))
+
+        listdata = []
+        for pl in data["Playlists"][playlist]:
+            listdata.append({pl:data["Playlists"][playlist][pl]})
+        random.shuffle(listdata)
+
+        newdict = {}
+        for entry in listdata:
+            for k, v in entry.items():
+                newdict[k] = v
+
+        data["Playlists"][playlist] = newdict
+
+        with open(f'db/Playlists/{ctx.author.id}.json', "w") as f:
+            json.dump(data, f, indent=4)
+
+        await ctx.send(f"Succesfully shuffled playlist `{playlist}`!")
 
 def setup(bot):
     bot.add_cog(Music(bot))

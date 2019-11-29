@@ -32,12 +32,12 @@ class Pages:
     permissions: discord.Permissions
         Our permissions for the channel.
     """
-    def __init__(self, ctx, *, entries, per_page=12, show_entry_count=True, title=None, thumbnail=None, footericon=None, footertext=None, embed_color = discord.Color.blurple()):
+    def __init__(self, ctx, *, entries, per_page=12, show_entry_count=True, title=None, thumbnail=None, footericon=None, footertext=None, author=None, embed_color = discord.Color.blurple()):
         self.bot = ctx.bot
         self.entries = entries
         self.message = ctx.message
         self.channel = ctx.channel
-        self.author = ctx.author
+        self.author = author if author else ctx.author
         self.thumbnail = thumbnail
         self.footericon = footericon
         self.footertext = footertext
@@ -89,13 +89,13 @@ class Pages:
     def prepare_embed(self, entries, page, *, first=False):
         p = []
         for index, entry in enumerate(entries, 1 + ((page - 1) * self.per_page)):
-            p.append(f'{index}. {entry}')
+            p.append(f'`{index}.` {entry}')
 
         if self.maximum_pages > 1:
             if self.show_entry_count:
-                text = f'Page {page}/{self.maximum_pages} ({len(self.entries)} entries)'
+                text = f'Showing page {page}/{self.maximum_pages} ({len(self.entries)} entries)'
             else:
-                text = f'Page {page}/{self.maximum_pages}'
+                text = f'Showing page {page}/{self.maximum_pages}'
 
             self.embed.set_footer(text=text)
 
@@ -104,6 +104,7 @@ class Pages:
 
         self.embed.description = '\n'.join(p)
         self.embed.title = self.title or discord.Embed.Empty
+        self.embed.set_author(icon_url=self.author.avatar_url, name=str(self.author))
 
     async def show_page(self, page, *, first=False):
         self.current_page = page

@@ -32,7 +32,13 @@ class HelpCommand(commands.HelpCommand):
             emb.description = get_text(self.context.guild, f"{command.cog.qualified_name.lower()}_help", f"{command.name}_description")
         usage = get_text(self.context.guild, "help", "help.command_help.usage")
         try:
-            usg = get_text(self.context.guild, f"{command.cog.qualified_name.lower()}_help", f"{command.name}_usage")
+            if command.parent:
+                try:
+                    usg = get_text(self.context.guild, f"{command.cog.qualified_name.lower()}_help", f"{command.parent}_{command.name}_usage")
+                except:
+                    usg = get_text(self.context.guild, f"{command.cog.qualified_name.lower()}_help", f"{command.name}_usage")
+            else:
+                usg = get_text(self.context.guild, f"{command.cog.qualified_name.lower()}_help", f"{command.name}_usage")
             emb.add_field(name=usage, value=f"{self.context.prefix}{command.qualified_name} " + usg)
         except KeyError:
             emb.add_field(name=usage, value=f"{self.context.prefix}{command.qualified_name}")
@@ -204,7 +210,6 @@ class HelpCommand(commands.HelpCommand):
         for name, cont in pages.items():
             formatted.append((name , cont))
         footer_text = get_text(self.context.guild, "help", "help.category_page.footer_info").format(self.context.prefix)
-        print(formatted)
         pages = FieldPages(self.context,
                            embed_color=self.context.bot.embed_color,
                            entries=formatted,
