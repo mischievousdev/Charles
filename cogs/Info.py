@@ -82,7 +82,7 @@ class info(commands.Cog, name='Info'):
         m_count = 0
 
         for m in d["Guild_Info"]["Modules"]:
-            if m in ["Owner", "Help", "DBL", "Events", "Jishaku", "Settings", "Test", "Economy"]:
+            if m in ["Owner", "Help", "DBL", "Events", "Jishaku", "Settings", "Test", "Economy", "YTT"]:
                 continue
             if d["Guild_Info"]["Modules"][m]["Toggle"] == False:
                 continue
@@ -110,7 +110,7 @@ class info(commands.Cog, name='Info'):
         desc = ""
 
         for m in d["Guild_Info"]["Modules"]:
-            if m in ["Owner", "Help", "DBL", "Events", "Jishaku", "Settings", "Test"]:
+            if m in ["Owner", "Help", "DBL", "Events", "Jishaku", "Settings", "Test", "YTT"]:
                 continue
             if d["Guild_Info"]["Modules"][m]["Toggle"] == False:
                 desc += f"<:slide_no:522874184720842768> {m}\n"

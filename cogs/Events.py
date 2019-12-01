@@ -49,6 +49,9 @@ class Events(commands.Cog, name="Events"):
         else:
             cmd = ctx.command.name
 
+        if ctx.command.cog_name == "YTT":
+            return
+
         if not cmd in self.bot.cmdUsage:
             self.bot.cmdUsage[cmd] = 1
         else:

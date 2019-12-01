@@ -110,6 +110,14 @@ def is_owner():
             raise owner_only
     return commands.check(predicate)
 
+def is_guild(ID):
+    def predicate(ctx):
+        if ctx.guild.id == ID:
+            return True
+        else:
+            raise owner_only
+    return commands.check(predicate)
+
 def is_admin():
     async def pred(ctx):
         return await check_guild_permissions(ctx, {'administrator': True})
