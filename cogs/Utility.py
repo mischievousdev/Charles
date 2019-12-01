@@ -566,8 +566,8 @@ class utility(commands.Cog, name="Utility"):
         embed.set_footer(icon_url="https://cdn.discordapp.com/attachments/562784997962940476/611010770603343872/twitter_400x400.png", text=get_text(ctx.guild, "utility", "utility.hb_ref"))
         await ctx.send(embed=embed)
 
-    @commandExtra(category="Utility")
-    async def tr(self, ctx, *, translate):
+    @commandExtra(category="Utility", aliases=['tr'])
+    async def translate(self, ctx, *, translate):
         """Translate some stuff!  Takes a phrase, the from language identifier (optional), and the to language identifier.
         To see a number of potential language identifiers, use the langlist command.
 
