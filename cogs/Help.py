@@ -147,6 +147,9 @@ class HelpCommand(commands.HelpCommand):
         with open(f'db/guilds/{self.context.guild.id}.json', 'r') as f:
             d = json.load(f)
 
+        if command.cog_name in self.ignore_cogs:
+            return await self.send_error_message(self.command_not_found(command.name))
+
         if d["Guild_Info"]["Modules"][command.cog_name]["Toggle"] == False:
             return await self.send_error_message(self.command_not_found(command.name))
         if isinstance(command, commandsPlus):
@@ -159,6 +162,9 @@ class HelpCommand(commands.HelpCommand):
     async def send_group_help(self, group):
         with open(f'db/guilds/{self.context.guild.id}.json', 'r') as f:
             d = json.load(f)
+
+        if group.cog_name in self.ignore_cogs:
+            return await self.send_error_message(self.command_not_found(group.name))
 
         if d["Guild_Info"]["Modules"][group.cog_name]["Toggle"] == False:
             return await self.send_error_message(self.command_not_found(group.name))
@@ -183,6 +189,9 @@ class HelpCommand(commands.HelpCommand):
             return
         with open(f'db/guilds/{self.context.guild.id}.json', 'r') as f:
             d = json.load(f)
+
+        if cog.qualified_name in self.ignore_cogs:
+            return
 
         if d["Guild_Info"]["Modules"][cog.qualified_name]["Toggle"] == False:
             return

@@ -134,6 +134,9 @@ class info(commands.Cog, name='Info'):
         
         if cmd.cog_name.lower() == "test":
             return await ctx.send("This is a testing command. I can not show you the source of this command yet.")
+
+        if cmd.cog_name.lower() == "ytt":
+            return await ctx.send("This is a private command...")
         
         try:
             source = inspect.getsource(cmd.callback)

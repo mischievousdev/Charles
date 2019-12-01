@@ -322,6 +322,8 @@ class Events(commands.Cog, name="Events"):
             botid = self.bot.get_user(505532526257766411)
             if message.author is not botid:
                 if message.guild is None:
+                    if message.content.lower().startswith("c?"):
+                        return await message.author.send("Hey there! In my DMs you can use commands without a prefix :)")
                     ctx = await self.bot.get_context(message)
                     if ctx.valid:
                         pass
