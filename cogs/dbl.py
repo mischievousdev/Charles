@@ -13,28 +13,28 @@ class DiscordBotsOrgAPI(commands.Cog, name="DBL"):
         self.bot = bot
         self.token = tokens.DBL # set this to your DBL token
         self.bot.dblpy = dbl.DBLClient(self.bot, self.token, webhook_path='/dblwebhook', webhook_auth=self.token, webhook_port=5000)
-        self.guild_post.start()
 
         self.icon = ""
         self.big_icon = ""
 
-    def cog_unload(self):
-        self.guild_post.cancel()
 
     @commands.Cog.listener()
     async def on_dbl_vote(self, data):
+        channel = await self.bot.fetch_channel(562784997962940476)
+        user = await self.bot.fetch_user(int(data['user']))
+        await channel.send(f"{str(user)} has voted!")
 
-        channel = self.bot.get_channel(562784997962940476)
-        user = self.bot.get_user(int(data['user']))
-        await channel.send(f"{user} has voted!")
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild):
+        await self.bot.dblpy.post_guild_count()
 
-    @tasks.loop(hours=1)
-    async def guild_post(self):
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild):
         await self.bot.dblpy.post_guild_count()
 
     @commands.Cog.listener()
     async def on_guild_post(self):
-        channel = self.bot.get_channel(562784997962940476)
+        channel = await self.bot.fetch_channel(562784997962940476)
         await channel.send("Guild count posted to DBL.")
 
 def setup(bot):

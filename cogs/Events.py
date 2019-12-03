@@ -9,6 +9,7 @@ from discord.ext.commands import errors
 from datetime import datetime
 from utils.translate import get_text
 from utils.default import commandsPlus, GroupPlus
+from db import tokens
 
 class Events(commands.Cog, name="Events"):
     def __init__(self, bot):
@@ -283,8 +284,8 @@ class Events(commands.Cog, name="Events"):
         await logchannel.send(embed=e)
 
         # Post guild count to DEL
-        async with aiohttp.ClientSession() as cs:
-            await cs.post('https://discordextremelist.xyz/api/bot/505532526257766411', headers={"Authorization": "DELAPI_4f17b3b9b3de384b82e2a1557458889f55016b8cd05c08ef425639f49ec388eaae16596b0c8691b3c0ab61b4792828249beae6297e353a1af5121ad9fc4dffc2"}, data={"guildCount": len(ctx.bot.guilds)})
+        async with aiohttp.ClientSession() as cs: 
+            await cs.post('https://discordextremelist.xyz/api/bot/505532526257766411', headers={"Authorization": tokens.DEL}, data={"guildCount": len(self.bot.guilds)})
 
 
     @commands.Cog.listener()
@@ -304,7 +305,7 @@ class Events(commands.Cog, name="Events"):
 
         # Post guild count to DEL
         async with aiohttp.ClientSession() as cs:
-            await cs.post('https://discordextremelist.xyz/api/bot/505532526257766411', headers={"Authorization": "DELAPI_4f17b3b9b3de384b82e2a1557458889f55016b8cd05c08ef425639f49ec388eaae16596b0c8691b3c0ab61b4792828249beae6297e353a1af5121ad9fc4dffc2"}, data={"guildCount": len(ctx.bot.guilds)})
+            await cs.post('https://discordextremelist.xyz/api/bot/505532526257766411', headers={"Authorization": tokens.DEL}, data={"guildCount": len(self.bot.guilds)})
 
 
     @commands.Cog.listener()

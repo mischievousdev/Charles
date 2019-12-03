@@ -127,19 +127,20 @@ class HelpCommand(commands.HelpCommand):
                 continue
             if d["Guild_Info"]["Modules"][extension.qualified_name]["Toggle"] == False:
                 continue
-            cogs += f"- {extension.icon} {extension.qualified_name}\n"
+            cogs += f"• {extension.icon} **{extension.qualified_name}**\n"
 
         emb.add_field(name=get_text(self.context.guild, "help", "help.main_page.field_title.categories"), value=cogs)
         s = get_text(self.context.guild, "help", "help.main_page.links_field.support")
         i = get_text(self.context.guild, "help", "help.main_page.links_field.invite")
         v = get_text(self.context.guild, "help", "help.main_page.links_field.vote")
         d =    get_text(self.context.guild, "help", "help.main_page.links_field.donate")
-        emb.add_field(name=get_text(self.context.guild, "help", "help.main_page.field_title.links"), value=f"- [{s}](https://discord.gg/wZSH7pz)\n- [{i}](https://discordapp.com/api/oauth2/authorize?client_id=505532526257766411&permissions=1609952598&scope=bot)\n- [{v}](https://discordbots.org/bot/505532526257766411/vote)\n- [{d}](https://donatebot.io/checkout/514232441498763279)\n- [Website](https://charles-bot.xyz/)\n- [Source](https://github.com/iDutchy/Charles)")
+        emb.add_field(name="\u200b", value="\u200b")
+        emb.add_field(name=get_text(self.context.guild, "help", "help.main_page.field_title.links"), value=f"• [{s}](https://discord.gg/wZSH7pz)\n• [{i}](https://discordapp.com/api/oauth2/authorize?client_id=505532526257766411&permissions=1609952598&scope=bot)\n• [{v}](https://discordbots.org/bot/505532526257766411/vote)\n• [{d}](https://donatebot.io/checkout/514232441498763279)\n• [Website](https://charles-bot.xyz/)\n• [Source](https://github.com/iDutchy/Charles)")
         ac = self.context.bot.get_channel(519281320686518283)
         a_msg = await ac.fetch_message(int(self.data["NEWS"]["ID"]))
         a_date = a_msg.created_at.strftime("%b %d, %Y")
         news_msg = self.data["NEWS"]["MESSAGE"]
-        emb.add_field(name=f"<:news:633059687557890070> Latest News - {a_date}", value=f"[Jump to full news message!]({a_msg.jump_url})\n\n{news_msg}")
+        emb.add_field(name=f"<:news:633059687557890070> Latest News - {a_date}", value=f"[Jump to full news message!]({a_msg.jump_url})\n\n{news_msg}", inline=False)
         emb.set_footer(text=get_text(self.context.guild, "help", "help.main_page.footer_info").format(self.context.prefix))
         await self.context.send(embed=emb)
     
