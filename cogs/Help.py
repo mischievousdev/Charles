@@ -25,7 +25,8 @@ class HelpCommand(commands.HelpCommand):
     
     def common_command_formatting(self, emb, command):
         emb.title = self.get_command_signature(command)
-        emb.set_thumbnail(url=command.cog.big_icon)
+        if command.cog_name != "Jishaku":
+            emb.set_thumbnail(url=command.cog.big_icon)
         try: # try to get as a grouped command, if error its not a group command
             emb.description = get_text(self.context.guild, f"{command.cog.qualified_name.lower()}_help", f"{command.parent}_{command.name}_description")
         except:
@@ -154,7 +155,9 @@ class HelpCommand(commands.HelpCommand):
         if d["Guild_Info"]["Modules"][command.cog_name]["Toggle"] == False:
             return await self.send_error_message(self.command_not_found(command.name))
         if isinstance(command, commandsPlus):
-            if d["Guild_Info"]["Modules"][command.cog_name]["Categories"][command.category] == False:
+            if command.name == "jishaku":
+                pass
+            elif d["Guild_Info"]["Modules"][command.cog_name]["Categories"][command.category] == False:
                 return await self.send_error_message(self.command_not_found(command.name))
 
         formatted = self.common_command_formatting(discord.Embed(color=self.context.bot.embed_color), command)
@@ -187,6 +190,8 @@ class HelpCommand(commands.HelpCommand):
     
     async def send_cog_help(self, cog):
         if (cog.qualified_name.upper() in self.owner_cogs and not await self.context.bot.is_owner(self.context.author)) or cog.qualified_name.upper() in self.ignore_cogs:
+            return
+        if cog.qualified_name == "Jishaku":
             return
         with open(f'db/guilds/{self.context.guild.id}.json', 'r') as f:
             d = json.load(f)

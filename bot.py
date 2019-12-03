@@ -43,7 +43,7 @@ async def get_prefix(bot, message):
 BOT_EXTENSIONS = [
     'cogs.Help',
     'cogs.Owner',
-    'cogs.Jishaku',
+    'jishaku',
     'cogs.Fun',
     'cogs.Music',
     'cogs.Events',
