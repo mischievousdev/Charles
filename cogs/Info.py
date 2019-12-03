@@ -77,7 +77,7 @@ class info(commands.Cog, name='Info'):
         with open(f'db/guilds/{ctx.guild.id}.json', 'r') as f:
             d = json.load(f)
 
-        e = discord.Embed(color=self.bot.embed_color, title="**Category Settings**")
+        e = discord.Embed(color=self.bot.embed_color, title=get_text(ctx.guild, 'info', 'info.category_settings'))
 
         m_count = 0
 
@@ -96,7 +96,7 @@ class info(commands.Cog, name='Info'):
             e.add_field(name=m, value=toggles)
 
         if m_count == 0:
-            e.description = "All ***modules*** are disabled. Please enable at least **1** module to view the category settings!"
+            e.description = get_text(ctx.guild, 'info', 'info.modules_disabled')
 
         await ctx.send(embed=e)
 
@@ -105,7 +105,7 @@ class info(commands.Cog, name='Info'):
         with open(f'db/guilds/{ctx.guild.id}.json', 'r') as f:
             d = json.load(f)
 
-        e = discord.Embed(color=self.bot.embed_color, title="**Module Settings**")
+        e = discord.Embed(color=self.bot.embed_color, title=get_text(ctx.guild, 'info', 'info.module_settings'))
 
         desc = ""
 
@@ -130,18 +130,18 @@ class info(commands.Cog, name='Info'):
 
         cmd = self.bot.get_command(command)
         if cmd is None:
-            return await ctx.send("This command doesn't exist!")
+            return await ctx.send(get_text(ctx.guild, 'info', 'info.source.notexist'))
         
         if cmd.cog_name.lower() == "test":
-            return await ctx.send("This is a testing command. I can not show you the source of this command yet.")
+            return await ctx.send(get_text(ctx.guild, 'info', 'info.source.test'))
 
         if cmd.cog_name.lower() == "ytt":
-            return await ctx.send("This is a private command...")
+            return await ctx.send(get_text(ctx.guild, 'info', 'info.source.private'))
         
         try:
             source = inspect.getsource(cmd.callback)
         except AttributeError:
-            return await ctx.send(f"Could not find command `{command}`.")
+            return await ctx.send(get_text(ctx.guild, 'info', 'info.source.notexist'))
         if len(source) + 8 <= 2000:
             await ctx.send(f'```py\n{source}\n```')
         else:
@@ -158,7 +158,7 @@ class info(commands.Cog, name='Info'):
             location = module.replace('.', '/') + '.py'
 
             final_url = f'<{source_url}/blob/{branch}/{location}#L{firstlineno}-L{firstlineno + len(lines) - 1}>'
-            await ctx.send(f"Source was too long to post on discord, so here's the url to the source on GitHub:\n{final_url}")
+            await ctx.send(get_text(ctx.guild, 'info', 'info.source.github') + f"\n{final_url}")
 
     @groupExtra(invoke_without_command=True, category="Server Info")
     async def guildsettings(self, ctx):
@@ -281,20 +281,27 @@ class info(commands.Cog, name='Info'):
 
 
         countmsg   = "```ml\n"
-        countmsg  += "File Type: | File Count: | Line Count:\n"
-        countmsg  += "-----------+-------------+-------------\n"
+        countmsg  += "    📁           📄            📝\n"
+        countmsg  += "---------------------------------------\n"
         countmsg += f"Python     | {pyfiles}{' '*int(11-len(str(pyfiles)))} | {pylines:,}\n"
         countmsg += f"JSON       | {jsonfiles}{' '*int(11-len(str(jsonfiles)))} | {jsonlines:,}\n"
         countmsg  += "```"
 
         othermsg   = "```ml\n"
-        othermsg  += "File Type: | File Count: | Line Count:\n"
-        othermsg  += "-----------+-------------+-------------\n"
+        othermsg  += "    📁           📄            📝\n"
+        othermsg  += "---------------------------------------\n"
         othermsg += f"Txt        | {txtfiles}{' '*int(11-len(str(txtfiles)))} | {txtlines:,}\n"
         othermsg += f"Png        | {pngfiles}{' '*int(11-len(str(pngfiles)))} | N/A\n"
         othermsg += f"Jpg        | {jpgfiles}{' '*int(11-len(str(jpgfiles)))} | N/A\n"
         othermsg += "```"
-        await ctx.send(f'**Total coding lines count:**\n{countmsg}\n**Other files line count:**\n{othermsg}')
+
+        e = discord.Embed(color=self.bot.embed_color,
+                          description=get_text(ctx.guild, 'info', 'info.linecount').format(countmsg, othermsg))
+        ftype = "📁" + get_text(ctx.guild, 'info', 'info.ftype')
+        fcount = "📄" + get_text(ctx.guild, 'info', 'info.fcount')
+        lcount = "📝" + get_text(ctx.guild, 'info', 'info.lcount')
+        e.set_author(name=f"{ftype}\n{fcount}\n{lcount}")
+        await ctx.send(embed=e)
 
     @commandExtra(category="User Info")
     async def credits(self, ctx):
@@ -332,7 +339,7 @@ class info(commands.Cog, name='Info'):
 
         contdesc = f"- **{tom}**"
 
-        embed.add_field(name="__**Notable Contributors:**__", value=contdesc)
+        embed.add_field(name=get_text(ctx.guild, 'info', 'info.credits.contributors'), value=contdesc)
 
         await ctx.send(embed=embed)
 
@@ -517,19 +524,19 @@ class info(commands.Cog, name='Info'):
         bughunter_role = supportguild.get_role(521132262587236364)
         if user in supportguild.members:
             if user in bughunter_role.members:
-                bughunter = "<:bughunter:633796873144238090> Bug Hunter"
+                bughunter = "<:bughunter:633796873144238090> " + get_text(ctx.guild, 'info', 'info.acknowledgements.bughunter')
                 acknowledgements.append(bughunter)
 
         eventwinner_role = supportguild.get_role(642176542897864734)
         if user in supportguild.members:
             if user in eventwinner_role.members:
-                eventwinner = "<:trophy:642177400565792798> Event Winner"
+                eventwinner = "<:trophy:642177400565792798> " + get_text(ctx.guild, 'info', 'info.acknowledgements.event')
                 acknowledgements.append(eventwinner)
 
         contributor_role = supportguild.get_role(643588797451206667)
         if user in supportguild.members:
             if user in contributor_role.members:
-                contributor = "<:contribution:643397975732912142> Contributor"
+                contributor = "<:contribution:643397975732912142> " + get_text(ctx.guild, 'info', 'info.acknowledgements.contributor')
                 acknowledgements.append(contributor)
 
         if acknowledgements:
@@ -607,7 +614,7 @@ class info(commands.Cog, name='Info'):
         embed.add_field(name=get_text(ctx.guild, 'info', 'info.chan'), value=f"<:channel:585783907841212418> {text}\n<:voice:585783907673440266> {voice}")
         embed.add_field(name=get_text(ctx.guild, 'info', 'info.created'), value=f"{default.date(self.bot.user.created_at)}\n({default.timeago(datetime.utcnow() - self.bot.user.created_at)})")
         embed.set_image(url="https://media.discordapp.net/attachments/647604857544638468/647606721954447360/Devision.png?width=1443&height=249")
-        embed.set_footer(text="Charles is one of the bots created by Devision.")
+        embed.set_footer(text=get_text(ctx.guild, 'info', 'info.devision'))
         await ctx.send(embed=embed)
 
     @commandExtra(category="Bot Info", aliases=['joinme', 'botinvite'])
