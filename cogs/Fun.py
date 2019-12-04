@@ -559,12 +559,12 @@ class Fun(commands.Cog, name='Fun'):
         if user2 is None:
             user2 = ctx.message.author
 
-        self_length = len(user1.name)
+        self_length = len(user1.display_name)
         first_length = round(self_length / 2)
-        first_half = user1.name[0:first_length]
-        usr_length = len(user2.name)
+        first_half = user1.display_name[0:first_length]
+        usr_length = len(user2.display_name)
         second_length = round(usr_length / 2)
-        second_half = user2.name[second_length:]
+        second_half = user2.display_name[second_length:]
         finalName = first_half + second_half
 
         score = random.randint(0, 100)
@@ -572,7 +572,7 @@ class Fun(commands.Cog, name='Fun'):
         counter_ = '█' * filled_progbar + '‍ ‍' * (10 - filled_progbar)
 
         em = discord.Embed(color=self.bot.embed_color)
-        em.title = f"%s + %s = {finalName} ❤" % (user1.name, user2.name,)
+        em.title = f"%s + %s = {finalName} ❤" % (user1.display_name, user2.display_name,)
         em.description = f"`{counter_}` **{score}%** " + get_text(ctx.guild, 'fun', "fun.love")
 
         await ctx.send(embed=em)
