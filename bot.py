@@ -107,7 +107,7 @@ class Charles(commands.AutoShardedBot):
 
     async def bot_logout(self):
         await super().logout()
-        #await self.session.close()
+        await self.session.close()
 
     async def bot_start(self):
         await self.login(tokens.BOT)

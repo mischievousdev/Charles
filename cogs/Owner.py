@@ -6,6 +6,7 @@ import traceback # Eval
 import math
 import humanize
 import copy # sudo
+import datetime
 import aiohttp
 
 from discord.ext import commands
@@ -329,15 +330,14 @@ class Owner(commands.Cog, name="Owner", command_attrs=dict(hidden=True)):
         except TypeError:
             await ctx.send("You need to either provide an image URL or upload one with the command")
 
-    @commandExtra(category="Owner Only")
+    @commandExtra(category="Owner Only", aliases=['shutdown', 'kys'])
     async def reboot(self, ctx):
         """ Reboot the bot """
         await ctx.message.add_reaction('a:Gears_Loading:470313276832743425')
         embed=discord.Embed(title="Rebooting...", color=0xfdac2b, timestamp=datetime.datetime.utcnow())
         channel = self.bot.get_channel(514959099235008513)
         await channel.send(embed=embed)
-        await asyncio.sleep(1)
-        await self.bot.logout()
+        await self.bot.bot_logout()
 
     @commandExtra(category="Messages")
     async def msg(self, ctx, channel : int, *, message : str):
