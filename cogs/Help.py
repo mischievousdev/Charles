@@ -124,7 +124,9 @@ class HelpCommand(commands.HelpCommand):
         for extension in self.context.bot.cogs.values():
             if self.context.author != owner and extension.qualified_name.upper() in self.owner_cogs:
                 continue
-            if self.context.author == owner and extension.qualified_name in self.ignore_cogs :
+            if self.context.author == owner and extension.qualified_name in self.ignore_cogs:
+                continue
+            if extension.qualified_name == "Jishaku":
                 continue
             if d["Guild_Info"]["Modules"][extension.qualified_name]["Toggle"] == False:
                 continue
