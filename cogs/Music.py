@@ -290,21 +290,25 @@ class Player(wavelink.Player):
         lyric_embed=discord.Embed(color=self.bot.embed_color,
                                   title=get_text(ctx.guild, 'music', 'music.controller.lyrics').format(song_title))
 
-        if len(song.lyrics) > 3072:
-            lyric_embed.description=song.lyrics[:2048]
-            lyric_embed.add_field(name="\u200b", value=song.lyrics[2048:-1024])
-            lyric_embed.add_field(name="\u200b", value=song.lyrics[-1024:1024])
 
-            return lyric_embed
-        elif len(song.lyrics) > 2048:
-            lyric_embed.description=song.lyrics[:2048]
-            lyric_embed.add_field(name="\u200b", value=song.lyrics[:-1024])
+        #TODO:
+        #if len(song.lyrics) > 3072:
+        #    lyric_embed.description=song.lyrics[:2048]
+        #    lyric_embed.add_field(name="\u200b", value=song.lyrics[2048:-1024])
+        #    lyric_embed.add_field(name="\u200b", value=song.lyrics[-1024:1024])
 
-            return lyric_embed
-        else:
-            lyric_embed.description=song.lyrics
+        #    return lyric_embed
+        #elif len(song.lyrics) > 2048:
+        #    lyric_embed.description=song.lyrics[:2048]
+        #    lyric_embed.add_field(name="\u200b", value=song.lyrics[:-1024])
 
-            return lyric_embed
+        #    return lyric_embed
+        #else:
+        #    lyric_embed.description=song.lyrics
+
+        lyric_embed.description=song.lyrics[:2045] + "..."
+
+        return lyric_embed
 
 
 class PlayerToo(Player):
@@ -686,7 +690,10 @@ class Music(commands.Cog, name="Music"):
                     await controller_msg.edit(embed=discord.Embed(color=self.bot.embed_color, description=get_text(ctx.guild, 'music', 'music.mp3_cancel')))
             if control == 'Lyric_Page':
                 await controller_msg.edit(embed=discord.Embed(color=self.bot.embed_color, description=get_text(ctx.guild, 'music', 'music.lyric_search') + " <a:discord_loading:587812494089912340>"))
-                await controller_msg.edit(embed=await Player.lyrics_page(self=player, ctx=ctx))
+                try:
+                    await controller_msg.edit(embed=await Player.lyrics_page(self=player, ctx=ctx))
+                except AttributeError:
+                    await controller_msg.edit(emned=discord.embed(color=self.bot.embed_color, description=get_text(ctx.guild, 'music', 'music.lyric_not_found')))
 
 
     @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True)
