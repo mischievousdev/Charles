@@ -426,12 +426,11 @@ class utility(commands.Cog, name="Utility"):
         await ctx.send(embed=embed, file=f)
         os.remove(f"db/images/{color}.png")
 
+    @commands.is_nsfw()
     @commandExtra(category="Utility") 
     @commands.cooldown(rate=1, per=2.0, type=commands.BucketType.user)
     async def urban(self, ctx, *, search: str):
         """ Find the 'best' definition to your words """
-        if not ctx.channel.is_nsfw():
-            return await ctx.send("This command can only be used in a NSFW channel!")
 
         async with aiohttp.ClientSession() as cs:
             async with cs.get(f'http://api.urbandictionary.com/v0/define?term={search}') as r:
