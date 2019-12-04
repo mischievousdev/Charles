@@ -61,13 +61,13 @@ class GuildSettings(commands.Cog, name="Settings"):
             d = json.load(f)
 
         if not module.title() in d["Guild_Info"]["Modules"]:
-            return await ctx.send("That's not a valid module!")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.invalid_module'))
 
         if module.title() in ["Owner", "Help", "DBL", "Events", "Jishaku", "Settings"]:
-            return await ctx.send("You can not toggle this module!")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.no_toggle'))
 
         if not category.title() in d["Guild_Info"]["Modules"][module.title()]["Categories"]:
-            return await ctx.send("That's not a valid category!")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.invalid_category'))
 
         count = 0
         for x in d["Guild_Info"]["Modules"][module.title()]["Categories"]:
@@ -75,20 +75,20 @@ class GuildSettings(commands.Cog, name="Settings"):
                 count += 1
 
         if count == 1 and d["Guild_Info"]["Modules"][module.title()]["Categories"][category.title()] != False:
-            return await ctx.send("You need to have at least 1 category enabled. If you want all disabled, please disable the whole module using the `toggle-module` command!")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.1_cat'))
 
 
         if d["Guild_Info"]["Modules"][module.title()]["Categories"][category.title()] == True:
             d["Guild_Info"]["Modules"][module.title()]["Categories"][category.title()] = False
-            toggle = "off"
+            toggle = get_text(ctx.guild, 'settings', 'settings.t_off')
         elif d["Guild_Info"]["Modules"][module.title()]["Categories"][category.title()] == False:
             d["Guild_Info"]["Modules"][module.title()]["Categories"][category.title()] = True
-            toggle = "on"
+            toggle = get_text(ctx.guild, 'settings', 'settings.t_on')
 
         with open(f"db/guilds/{ctx.guild.id}.json", "w") as f:
             json.dump(d, f, indent=4)
 
-        await ctx.send(f"Category `{category.title()}` from module `{module.title()}` has been toggled **{toggle}**!")
+        await ctx.send(get_text(ctx.guild, 'settings', 'settings.cat_toggle').format(category.title(), module.title(), toggle))
 
     @commands.has_permissions(administrator=True)
     @commandExtra(name="toggle-module", category="Settings")
@@ -98,7 +98,7 @@ class GuildSettings(commands.Cog, name="Settings"):
 
         enabled = 0
         disabled = 0
-        if module.lower() in ["*", "all"]:
+        if module.lower() in ["*", get_text(ctx.guild, 'settings', 'settings.all')]:
             for m in ["Fun", "Music", "Info", "Moderation", "Images", "Utility"]:
                 if d["Guild_Info"]["Modules"][m]["Toggle"] == True:
                     enabled += 1
@@ -108,49 +108,49 @@ class GuildSettings(commands.Cog, name="Settings"):
             if enabled >= disabled:
                 for m in ["Fun", "Music", "Info", "Moderation", "Images", "Utility"]:
                     d["Guild_Info"]["Modules"][m]["Toggle"] = False
-                    toggle = "off"
+                    toggle = get_text(ctx.guild, 'settings', 'settings.t_off')
             if disabled > enabled:
                 for m in ["Fun", "Music", "Info", "Moderation", "Images", "Utility"]:
                     d["Guild_Info"]["Modules"][m]["Toggle"] = True
-                    toggle = "on"
+                    toggle = get_text(ctx.guild, 'settings', 'settings.t_on')
 
             with open(f"db/guilds/{ctx.guild.id}.json", "w") as f:
                 json.dump(d, f, indent=4)
 
-            return await ctx.send(f"All modules have been toggled **{toggle}**!")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.mod_toggle_all').format(toggle))
 
         if not module.title() in d["Guild_Info"]["Modules"]:
-            return await ctx.send("That's not a valid module!")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.invalid_module'))
 
         if module.title() in ["Owner", "Help", "DBL", "Events", "Jishaku", "Settings"]:
-            return await ctx.send("You can not toggle this module!")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.no_toggle'))
 
         if d["Guild_Info"]["Modules"][module.title()]["Toggle"] == True:
             d["Guild_Info"]["Modules"][module.title()]["Toggle"] = False
-            toggle = "off"
+            toggle = get_text(ctx.guild, 'settings', 'settings.t_off')
         elif d["Guild_Info"]["Modules"][module.title()]["Toggle"] == False:
             d["Guild_Info"]["Modules"][module.title()]["Toggle"] = True
-            toggle = "on"
+            toggle = get_text(ctx.guild, 'settings', 'settings.t_off')
 
         with open(f"db/guilds/{ctx.guild.id}.json", "w") as f:
             json.dump(d, f, indent=4)
 
-        await ctx.send(f"Module `{module.title()}` has been toggled **{toggle}**!")
+        await ctx.send(get_text(ctx.guild, 'settings', 'settings.mod_toggle').format(module.title(),toggle))
 
     @commandExtra(category="Server Backups", name="delete-backup")
     async def delete_backup(self, ctx, id:int):
         i = str(id)
 
         if not os.path.exists(f'db/backups/{str(ctx.author.id)}.json'):
-            return await ctx.send("you have not made any backups yet.")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.no_backups'))
 
         with open(f'db/backups/{str(ctx.author.id)}.json', 'r') as f:
             d = json.load(f)
 
         if not i in d:
-            return await ctx.send("You do not have a backup with that ID.")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.invalid_id'))
 
-        msg = await ctx.send(f"Are you sure you wish to delete backup {i}? **This cannot be undone!**")
+        msg = await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.delete_confirm').format(i))
         await msg.add_reaction("<:tickYes:315009125694177281>")
         await msg.add_reaction("<:tickNo:315009174163685377>")
 
@@ -160,30 +160,30 @@ class GuildSettings(commands.Cog, name="Settings"):
         try:
             reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=check)
         except asyncio.TimeoutError:
-            await ctx.send('You took to long to reply, command has been cancelled.')
+            await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.timed_out'))
         else:
             if str(reaction.emoji) == "<:tickNo:315009174163685377>":
                 await msg.delete()
-                return await ctx.send("Ok, command has been cancelled.", delete_after=10)
+                return await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.cancel'), delete_after=10)
             elif str(reaction.emoji) == "<:tickYes:315009125694177281>":
                 await msg.delete()
                 d.pop(i)
                 with open(f'db/backups/{str(ctx.author.id)}.json', 'w') as f:
                     json.dump(d, f)
-                await ctx.send(f'Ok, backup {i} has been deleted!', delete_after=10)
+                await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.deleted').format(i), delete_after=10)
 
     @commandExtra(category="Server Backups", name="reset-backup")
     async def reset_backup(self, ctx, id:int):
         i = str(id)
 
         if not os.path.exists(f'db/backups/{str(ctx.author.id)}.json'):
-            return await ctx.send("you have not made any backups yet.")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.no_backups'))
 
         with open(f'db/backups/{str(ctx.author.id)}.json', 'r') as f:
             d = json.load(f)
 
         if not i in d:
-            return await ctx.send("You do not have a backup with that ID.")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.invalid_id'))
 
         for entry in d[i]["Channels"]["Cat"]:
             entry["restore"] = True
@@ -205,24 +205,24 @@ class GuildSettings(commands.Cog, name="Settings"):
         with open(f'db/backups/{str(ctx.author.id)}.json', 'w') as f:
             json.dump(d, f)
 
-        await ctx.send(f"Backup `{id}` has been reset and can now be used again.")
+        await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.reset').format(i))
 
     @commandExtra(category="Server Backups", name="backup-list", aliases=['restore-list'])
     async def list_backups(self, ctx):
         if not os.path.exists(f'db/backups/{str(ctx.author.id)}.json'):
-            return await ctx.send("you have not made any backups yet.")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.no_backups'))
 
         with open(f'db/backups/{str(ctx.author.id)}.json', 'r') as f:
             d = json.load(f)
 
         if len(d) == 0:
-            return await ctx.send("You haven't made any backups yet.")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.no_backups'))
 
-        e = discord.Embed(color=self.bot.embed_color, title="Backups made:")
+        e = discord.Embed(color=self.bot.embed_color, title=get_text(ctx.guild, 'settings', 'settings.bu.made'))
         e.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
 
         for entry in d:
-            e.add_field(name=f"ID: {entry}", value=f"**Server:** {d[entry]['Server']}\n**Created at:** {d[entry]['Backup-Time']}", inline=False)
+            e.add_field(name=get_text(ctx.guild, 'settings', 'settings.bu.id').format(entry), value=get_text(ctx.guild, 'settings', 'settings.bu.info').format(d[entry]['Server'], d[entry]['Backup-Time']), inline=False)
 
         await ctx.send(embed=e)
 
@@ -230,10 +230,10 @@ class GuildSettings(commands.Cog, name="Settings"):
     async def backup(self, ctx):
         perms = dict(ctx.author.guild_permissions)
         if not perms['administrator'] == True:
-            return await ctx.send("Only the guild owner can create a backup.")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.missing_perm'))
 
         if not os.path.exists(f'db/backups/{str(ctx.author.id)}.json'):
-            return await ctx.send("you have not made any backups yet.")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.no_backups'))
 
         if not os.path.exists(f'db/backups/{str(ctx.author.id)}.json'):
             f = open(f'db/backups/{str(ctx.author.id)}.json', 'x')
@@ -293,7 +293,7 @@ class GuildSettings(commands.Cog, name="Settings"):
         with open(f'db/backups/{str(ctx.author.id)}.json', 'w') as f:
             json.dump(d, f, indent=4)
 
-        await ctx.send(f"Backup with ID `{str(randID)}` has been created!")
+        await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.created').format(str(randID)))
 
     @commandExtra(category="Server Backups")
     async def restore(self, ctx, id:int, guild:int):
@@ -301,19 +301,19 @@ class GuildSettings(commands.Cog, name="Settings"):
         i = str(id)
 
         if len(g.channels) > 0:
-            return await ctx.send("There are still category, text or voice channels in this server. Please make sure this server is completely empty before restoring a backup!")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.restore.channels'))
 
         if len(g.roles) > 0:
-            return await ctx.send("There are still roles in this server. Please make sure this server is completely empty before restoring a backup!")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.restore.roles'))
 
 
         if len(g.emojis) > 0:
-            return await ctx.send("There are still emojis in this server. Please make sure this server is completely empty before restoring a backup!")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.restore.emoji'))
         if not os.path.exists(f'db/backups/{str(ctx.author.id)}.json'):
-            return await ctx.send("you have not made any backups yet.")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.no_backups'))
 
         if g.owner_id != ctx.author.id:
-            return await ctx.send("you need to be the owner of the server to load a restore file")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.restore.not_owner'))
 
         failures = False
 
@@ -322,24 +322,24 @@ class GuildSettings(commands.Cog, name="Settings"):
             d = json.load(f)
 
         if not i in d:
-            return await ctx.send("You do not have a backup with that ID.")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.invalid_id'))
 
         d[i]["Guild-ID"] = g.id
 
         if d[i]["Usable"] == False:
-            return await ctx.send(f"This backup cannot be used. Please run `reset-backup {i}` to fix this.")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.restore.not_usable').format(i))
 
         if d[i]["Fix-Only"] == True:
-            return await ctx.send("You already attempted to restore this backup, please use the `fix-restore` command to fix everything that hasnt been restored yet.")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.restore.need_fix'))
 
-        m = "<:tick:528774982067814441> | Initialisation completed!"
+        m = "<:tick:528774982067814441> | " + get_text(ctx.guild, 'settings', 'settings.restore.init_complete')
 
-        msg = await ctx.send("<a:discord_loading:587812494089912340> | Initiating restore...")
+        msg = await ctx.send("<a:discord_loading:587812494089912340> | " + get_text(ctx.guild, 'settings', 'settings.restore.init'))
 
         await asyncio.sleep(1.5)
 
         # Start creating categories
-        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | Restoring `Categories`...")
+        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | {get_text(ctx.guild, 'settings', 'settings.restore.categories')}")
 
         # Function to create categories
         async def create_category():
@@ -353,16 +353,16 @@ class GuildSettings(commands.Cog, name="Settings"):
                 c_count = c_count + 1
                 c["restore"] = False
             except (asyncio.TimeoutError, discord.HTTPException):
-                m += f'\n<:warn:620414236010741783> | Categories restored! {str(c_count)}/{str(len(d[i]["Channels"]["Cat"]))}'
+                m += f'\n<:warn:620414236010741783> | {get_text(ctx.guild, "settings", "settings.restore.categories_complete")} {str(c_count)}/{str(len(d[i]["Channels"]["Cat"]))}'
                 failures = True
                 break
         else:
-            m += f"\n<:tick:528774982067814441> | {str(c_count)} Categories restored!"
+            m += f"\n<:tick:528774982067814441> | {str(c_count)} {get_text(ctx.guild, 'settings', 'settings.restore.categories_complete')}"
 
 
 
         # Start creating text channels
-        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | Restoring `Text Channels`...")
+        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | {get_text(ctx.guild, 'settings', 'settings.restore.text')}")
 
         # Function to create text channels
         async def create_text():
@@ -380,14 +380,14 @@ class GuildSettings(commands.Cog, name="Settings"):
                 t_count = t_count + 1
                 t["restore"] = False
             except (asyncio.TimeoutError, discord.HTTPException): 
-                m += f'\n<:warn:620414236010741783> | Text Channels restored! {str(t_count)}/{str(len(d[i]["Channels"]["Text"]))}'
+                m += f'\n<:warn:620414236010741783> | {get_text(ctx.guild, "settings", "settings.restore.text_complete")} {str(t_count)}/{str(len(d[i]["Channels"]["Text"]))}'
                 failures = True
                 break
         else:
-            m += f"\n<:tick:528774982067814441> | {str(t_count)} Text Channels restored!"
+            m += f"\n<:tick:528774982067814441> | {str(t_count)} {get_text(ctx.guild, 'settings', 'settings.restore.text_complete')}"
 
         # Start creating voice channels
-        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | Restoring `Voice Channels`...")
+        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | {get_text(ctx.guild, 'settings', 'settings.restore.voice')}")
 
         # Function to create voice channels
         async def create_voice():
@@ -405,14 +405,14 @@ class GuildSettings(commands.Cog, name="Settings"):
                 v_count = v_count + 1
                 v["restore"] = False
             except (asyncio.TimeoutError, discord.HTTPException): 
-                m += f'\n<:warn:620414236010741783> | Voice Channels restored! {str(v_count)}/{str(len(d[i]["Channels"]["Voice"]))}'
+                m += f'\n<:warn:620414236010741783> | {get_text(ctx.guild, "settings", "settings.restore.voice_complete")} {str(v_count)}/{str(len(d[i]["Channels"]["Voice"]))}'
                 failures = True
                 break
         else:
-            m += f"\n<:tick:528774982067814441> | {str(v_count)} Voice Channels restored!"
+            m += f"\n<:tick:528774982067814441> | {str(v_count)} {get_text(ctx.guild, 'settings', 'settings.restore.voice_complete')}"
 
         # Start creating roles
-        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | Restoring `Roles`...")
+        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | {get_text(ctx.guild, 'settings', 'settings.restore.roles')}")
 
         # Function to create roles
         async def create_role():
@@ -430,14 +430,14 @@ class GuildSettings(commands.Cog, name="Settings"):
                 r_count = r_count + 1
                 r["restore"] = False
             except (asyncio.TimeoutError, discord.HTTPException):
-                m += f'\n<:warn:620414236010741783> | Roles restored! {str(r_count)}/{str(len(d[i]["Roles"]))}'
+                m += f'\n<:warn:620414236010741783> | {get_text(ctx.guild, "settings", "settings.restore.roles_complete")} {str(r_count)}/{str(len(d[i]["Roles"]))}'
                 failures = True
                 break
         else:
-            m += f"\n<:tick:528774982067814441> | {str(r_count)} Roles restored!"
+            m += f"\n<:tick:528774982067814441> | {str(r_count)} {get_text(ctx.guild, 'settings', 'settings.restore.roles_complete')}"
 
         # Start creating emojis
-        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | Restoring `Emojis`...")
+        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | {get_text(ctx.guild, 'settings', 'settings.restore.emoji')}")
 
         # Function to create the emoji
         async def create_emoji():
@@ -454,17 +454,17 @@ class GuildSettings(commands.Cog, name="Settings"):
                 e_count = e_count + 1
                 e["restore"] = False
             except (asyncio.TimeoutError, discord.HTTPException): 
-                m += f'\n<:warn:620414236010741783> | Emojis restored! {str(e_count)}/{str(len(d[i]["Emoji"]))}'
+                m += f'\n<:warn:620414236010741783> | {get_text(ctx.guild, "settings", "settings.restore.emoji_complete")} {str(e_count)}/{str(len(d[i]["Emoji"]))}'
                 failures = True
                 break
         else:
-            m += f"\n<:tick:528774982067814441> | {str(e_count)} Emojis restored!"
+            m += f"\n<:tick:528774982067814441> | {str(e_count)} {get_text(ctx.guild, 'settings', 'settings.restore.emoji_complete')}"
 
         # Backup completed!
         if failures == True:
-            await msg.edit(content=f"{m}\n\n<:tick:528774982067814441> | Guild restore complete, but there were some issues... I either got ratelimited (try doing the `fix-restore` command later) or you've reached a limit (more info: <https://discordia.me/en/server-limits>).")
+            await msg.edit(content=f"{m}\n\n<:tick:528774982067814441> | {get_text(ctx.guild, 'settings', 'settings.restore.complete_x')}")
         else:
-            await msg.edit(content=f"{m}\n\n<:tick:528774982067814441> | Guild restore complete!")
+            await msg.edit(content=f"{m}\n\n<:tick:528774982067814441> | {get_text(ctx.guild, 'settings', 'settings.restore.complete')}")
             if c_count == 0 and t_count == 0 and v_count == 0 and r_count == 0 and e_count == 0:
                 d[i]["Usable"] = False
 
@@ -478,7 +478,7 @@ class GuildSettings(commands.Cog, name="Settings"):
         i = str(id)
 
         if not os.path.exists(f'db/backups/{str(ctx.author.id)}.json'):
-            return await ctx.send("you have not made any backups yet.")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.no_backups'))
 
         failures = False
 
@@ -488,25 +488,25 @@ class GuildSettings(commands.Cog, name="Settings"):
             d = json.load(f)
 
         if not i in d:
-            return await ctx.send("You do not have a backup with that ID.")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.invalid_id'))
 
 
         if d[i]["Usable"] == False:
-            return await ctx.send(f"This backup cannot be used. Please run `reset-backup {i}` to fix this.")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.restore.not_usable').format(i))
 
         if d[i]["Fix-Only"] == False:
-            return await ctx.send("This is still a fresh backup, please use the regular `restore` command in stead of the fix. :)")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.fix.cant_fix'))
 
         g = self.bot.get_guild(d[i]["Guild-ID"])
         if g.owner_id != ctx.author.id:
-            return await ctx.send("you need to be the owner of the server to load a restore file")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.restore.not_owner'))
 
-        m = "<:tick:528774982067814441> | Initialisation completed!"
+        m = "<:tick:528774982067814441> | " + get_text(ctx.guild, 'settings', 'settings.fix.init_complete')
         msg = await ctx.send("<a:discord_loading:587812494089912340> | Initiating fix...")
         await asyncio.sleep(1.5)
 
         # Start creating categories
-        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | Attempting to fix `Categories`...")
+        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | {get_text(ctx.guild, 'settings', 'settings.fix.cat')}")
 
         # Function to create categories
         async def create_category():
@@ -521,17 +521,17 @@ class GuildSettings(commands.Cog, name="Settings"):
                     c_count = c_count + 1
                     c["restore"] = False
                 except (asyncio.TimeoutError, discord.HTTPException):
-                    m += f'\n<:warn:620414236010741783> | Categories could not be fixed! {str(c_count)} were fixed.'
+                    m += f'\n<:warn:620414236010741783> | {get_text(ctx.guild, "settings", "settings.fix.cat_cant_fix").format(str(c_count))}'
                     failures = True
                     break
         else:
             if c_count == 0:
-                m += f"\n<:tick:528774982067814441> | There were no Categories that needed to be fixed!"
+                m += f"\n<:tick:528774982067814441> | {get_text(ctx.guild, 'settings', 'settings.fix.cat_no_fix')}"
             else:
-                m += f"\n<:tick:528774982067814441> | {str(c_count)} Categories fixed!"
+                m += f"\n<:tick:528774982067814441> | {str(c_count)} {get_text(ctx.guild, 'settings', 'settings.fix.cat_fix')}"
 
         # Start creating text channels
-        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | Attempting to fix `Text Channels`...")
+        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | {get_text(ctx.guild, 'settings', 'settings.fix.text')}")
 
         # Function to create text channels
         async def create_text():
@@ -550,17 +550,17 @@ class GuildSettings(commands.Cog, name="Settings"):
                     t_count = t_count + 1
                     t["restore"] = False
                 except (asyncio.TimeoutError, discord.HTTPException):
-                    m += f'\n<:warn:620414236010741783> | Text Channels could not be fixed! {str(t_count)} were fixed.'
+                    m += f'\n<:warn:620414236010741783> | {get_text(ctx.guild, "settings", "settings.fix.text_cant_fix").format(str(t_count))}'
                     failures = True
                     break
         else:
             if t_count == 0:
-                m += f"\n<:tick:528774982067814441> | There were no Text Channels that needed to be fixed!"
+                m += f"\n<:tick:528774982067814441> | {get_text(ctx.guild, 'settings', 'settings.fix.text_no_fix')}"
             else:
-                m += f"\n<:tick:528774982067814441> | {str(t_count)} Text Channels fixed!"
+                m += f"\n<:tick:528774982067814441> | {str(t_count)} {get_text(ctx.guild, 'settings', 'settings.fix.text_fix')}"
 
         # Start creating voice channels
-        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | Attempting to fix `Voice Channels`...")
+        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | {get_text(ctx.guild, 'settings', 'settings.fix.voice')}")
 
         # Function to create voice channels
         async def create_voice():
@@ -579,17 +579,17 @@ class GuildSettings(commands.Cog, name="Settings"):
                     v_count = v_count + 1
                     v["restore"] = False
                 except (asyncio.TimeoutError, discord.HTTPException): 
-                    m += f'\n<:warn:620414236010741783> | Voice Channels could not be fixed! {str(v_count)} were fixed.'
+                    m += f'\n<:warn:620414236010741783> | {get_text(ctx.guild, "settings", "settings.fix.voice_cant_fix").format(str(v_count))}'
                     failures = True
                     break
         else:
             if v_count == 0:
-                m += f"\n<:tick:528774982067814441> | There were no Voice Channels that needed to be fixed!"
+                m += f"\n<:tick:528774982067814441> | {get_text(ctx.guild, 'settings', 'settings.fix.voice_no_fix')}"
             else:
-                m += f"\n<:tick:528774982067814441> | {str(v_count)} Voice Channels fixed!"
+                m += f"\n<:tick:528774982067814441> | {str(v_count)} {get_text(ctx.guild, 'settings', 'settings.fix.voice_fix')}"
 
         # Start creating roles
-        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | Attempting to fix `Roles`...")
+        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | {get_text(ctx.guild, 'settings', 'settings.fix.roles')}")
 
         # Function to create roles
         async def create_role():
@@ -608,17 +608,17 @@ class GuildSettings(commands.Cog, name="Settings"):
                     r_count = r_count + 1
                     r["restore"] = False
                 except (asyncio.TimeoutError, discord.HTTPException):
-                    m += f'\n<:warn:620414236010741783> | Roles could not be fixed! {str(r_count)} were fixed.'
+                    m += f'\n<:warn:620414236010741783> | {get_text(ctx.guild, "settings", "settings.fix.roles_cant_fix").format(str(r_count))}'
                     failures = True
                     break
         else:
             if r_count == 0:
-                m += f"\n<:tick:528774982067814441> | There were no Roles that needed to be fixed!"
+                m += f"\n<:tick:528774982067814441> | {get_text(ctx.guild, 'settings', 'settings.fix.roles_no_fix')}"
             else:
-                m += f"\n<:tick:528774982067814441> | {str(r_count)} Roles fixed!"
+                m += f"\n<:tick:528774982067814441> | {str(r_count)} {get_text(ctx.guild, 'settings', 'settings.fix.roles_fix')}"
 
         # Start creating emojis
-        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | Attempting to fix `Emojis`...")
+        await msg.edit(content=f"{m}\n<a:discord_loading:587812494089912340> | {get_text(ctx.guild, 'settings', 'settings.fix.emoji')}")
 
         # Function to create the emoji
         async def create_emoji():
@@ -636,20 +636,20 @@ class GuildSettings(commands.Cog, name="Settings"):
                     e_count = e_count + 1
                     e["restore"] = False
                 except (asyncio.TimeoutError, discord.HTTPException): 
-                    m += f'\n<:warn:620414236010741783> | Emojis could not be fixed! {str(e_count)} were fixed.'
+                    m += f'\n<:warn:620414236010741783> | {get_text(ctx.guild, "settings", "settings.fix.emoji_cant_fix").format(str(e_count))}'
                     failures = True
                     break
         else:
             if e_count == 0:
-                m += f"\n<:tick:528774982067814441> | There were no Emojis that needed to be fixed!"
+                m += f"\n<:tick:528774982067814441> | {get_text(ctx.guild, 'settings', 'settings.fix.emoji_no_fix')}"
             else:
-                m += f"\n<:tick:528774982067814441> | {str(e_count)} Emojis fixed!"
+                m += f"\n<:tick:528774982067814441> | {str(e_count)} {get_text(ctx.guild, 'settings', 'settings.fix.emoji_fix')}"
 
         # Backup completed!
         if failures == True:
-            await msg.edit(content=f"{m}\n\n<:tick:528774982067814441> | Guild restore fix complete, but there were some issues... I either got ratelimited (try doing the `fix-restore` command later) or you've reached a limit (more info: <https://discordia.me/en/server-limits>).")
+            await msg.edit(content=f"{m}\n\n<:tick:528774982067814441> | {get_text(ctx.guild, 'settings', 'settings.fix.complete_x')}")
         else:
-            await msg.edit(content=f"{m}\n\n<:tick:528774982067814441> | Guild restore fix complete!")
+            await msg.edit(content=f"{m}\n\n<:tick:528774982067814441> | {get_text(ctx.guild, 'settings', 'settings.fix.complete')}")
             if c_count == 0 and t_count == 0 and v_count == 0 and r_count == 0 and e_count == 0:
                 d[i]["Usable"] = False
 
@@ -987,7 +987,7 @@ class GuildSettings(commands.Cog, name="Settings"):
     async def embed_color(self, ctx, color):
 
         if not HEX.match(color):
-            return await ctx.send("That is not a valid HEX color! Please only use a `#******` or `0x******` HEX format!")
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.emb_invalid_hex'))
 
         with open(f"db/guilds/{ctx.guild.id}.json", "r") as f:
             data = json.load(f)
