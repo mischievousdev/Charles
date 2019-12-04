@@ -74,10 +74,7 @@ class Events(commands.Cog, name="Events"):
             await ctx.send_help(ctx.command)
 
         if isinstance(err, errors.BadArgument):
-            errormsg=discord.Embed(color=0xFF7070)
-            errormsg.add_field(name="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_ba_title"),
-                               value=get_text(ctx.guild, "events", "events.oce_ba_help").format(ctx.prefix))
-            await ctx.send(embed=errormsg)
+            await ctx.send_help(ctx.command)
 
         elif isinstance(err.original, discord.Forbidden):
             errormsg=discord.Embed(color=0xFF7070)
