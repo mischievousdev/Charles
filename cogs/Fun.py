@@ -176,8 +176,11 @@ class Fun(commands.Cog, name='Fun'):
     @commandExtra(category="Random", invoke_without_command=True)
     async def fact(self, ctx, choice=None):
         facts = ['koala', 'dog', 'cat', 'panda', 'fox', 'bird', 'racoon', 'kangaroo', 'elephant', 'whale', 'giraffe']
+        if choice == None:
+            return await ctx.send(get_text(ctx.guild, 'fun', 'fun.fact').format(str('` | `'.join(facts)), ctx.prefix))
+
         if not choice.lower() in facts:
-            return await ctx.send(f"You can get a random fact from the following animals:\n\n`{'` | `'.join(facts)}`\n\nUse the command like: `{ctx.prefix}fact animal`")
+            return await ctx.send(get_text(ctx.guild, 'fun', 'fun.fact').format(str('` | `'.join(facts)), ctx.prefix))
 
         async with aiohttp.ClientSession() as cs:
             async with cs.get(f'https://some-random-api.ml/facts/{choice.lower()}') as r:
@@ -197,6 +200,9 @@ class Fun(commands.Cog, name='Fun'):
             async with cs.get(f'https://some-random-api.ml/pokedex?pokemon={pokemon}') as r:
                 res = await r.json()
 
+
+        if 'error' in res:
+            return await ctx.send(get_text(ctx.guild, 'fun', 'fun.pokemon.not_found'))
         e = discord.Embed(color=self.bot.embed_color)
         e.title = f"{res['name']} (#{res['id']})"
         desc = f"**{get_text(ctx.guild, 'fun', 'fun.pokemon.type')}:** {', '.join(res['type'])}\n"
@@ -250,34 +256,33 @@ class Fun(commands.Cog, name='Fun'):
         new_emb.description = get_text(ctx.guild, 'fun', "fun.10s_result").format(result)
         await msg.edit(embed=new_emb)
 
-
     @commandExtra(category="Funny")
     @commands.cooldown(rate=1, per=30, type=commands.BucketType.user)
     async def hack(self, ctx, user: discord.User):
-        msg1 = await ctx.send(f"Hacking {user.display_name}'s IP-Address... <a:Smooth_Loading:470313388782911489>")
+        msg = await ctx.send("<a:Smooth_Loading:470313388782911489> | " + get_text(ctx.guild, 'fun', 'fun.hack.start').format(user.display_name))
         await asyncio.sleep(3)
-        newmsg1 = f"Found {user.display_name}'s IP-Address! <:tick:528774982067814441>"
-        await msg1.edit(content=newmsg1)
+        newmsg = "<:tick:528774982067814441> | " + get_text(ctx.guild, 'fun', 'fun.hack.start_check').format(user.display_name)
+        await msg.edit(content=newmsg)
         await asyncio.sleep(1)
-        msg2 = await ctx.send(f"Locating {user.display_name}... <a:Smooth_Loading:470313388782911489>")
+        await msg.edit(content=newmsg + "\n<a:Smooth_Loading:470313388782911489> | " + get_text(ctx.guild, 'fun', 'fun.hack.locate').format(user.display_name))
         await asyncio.sleep(3)
-        newmsg2 = f"Found {user.display_name}'s location! <:tick:528774982067814441>"
-        await msg2.edit(content=newmsg2)
+        newmsg += f"\n<:tick:528774982067814441> | {get_text(ctx.guild, 'fun', 'fun.hack.locate_check').format(user.display_name)}"
+        await msg.edit(content=newmsg)
         await asyncio.sleep(1)
-        msg3 = await ctx.send(f"Scanning through {user.display_name}'s files... <a:Smooth_Loading:470313388782911489>")
+        await msg.edit(content=newmsg + "\n<a:Smooth_Loading:470313388782911489> | " + get_text(ctx.guild, 'fun', 'fun.hack.scan').format(user.display_name))
         await asyncio.sleep(3)
-        newmsg3 = f"Scanned all of {user.display_name}'s files! <:tick:528774982067814441>"
-        await msg3.edit(content=newmsg3)
+        newmsg += f"\n<:tick:528774982067814441> | {get_text(ctx.guild, 'fun', 'fun.hack.scan_check').format(user.display_name)}"
+        await msg.edit(content=newmsg)
         await asyncio.sleep(1)
-        msg4 = await ctx.send("Searching for useful information... <a:Smooth_Loading:470313388782911489>")
+        await msg.edit(content=newmsg + "\n<a:Smooth_Loading:470313388782911489> | "  + get_text(ctx.guild, 'fun', 'fun.hack.info'))
         await asyncio.sleep(3)
-        newmsg4 = "Completed! <:tick:528774982067814441>"
-        await msg4.edit(content=newmsg4)
+        newmsg += f"\n<:tick:528774982067814441> | {get_text(ctx.guild, 'fun', 'fun.hack.info_check')}"
+        await msg.edit(content=newmsg)
         await asyncio.sleep(1)
-        msg5 = await ctx.send("Loading search result... <a:Smooth_Loading:470313388782911489>")
+        await msg.edit(content=newmsg + "\n<a:Smooth_Loading:470313388782911489> | " + get_text(ctx.guild, 'fun', 'fun.hack.load'))
         await asyncio.sleep(3)
-        newmsg5 = "Here's what I found:"
-        await msg5.edit(content=newmsg5)
+        newmsg += f"\n\n{get_text(ctx.guild, 'fun', 'fun.hack.load_check')}"
+        await msg.edit(content=newmsg)
         await asyncio.sleep(1)
 
         hackimg = random.choice([
@@ -293,19 +298,9 @@ class Fun(commands.Cog, name='Fun'):
             "https://cdn.discordapp.com/attachments/528778876839788555/528782260242219018/hack10.jpg"
         ])
 
-#        ##shared_guilds = list([i for i in ctx.bot.guilds if i.get_member(user.id)])
-#        ##guild_pick = random.choice(shared_guilds)
-#        ##for guild in guild_pick:
-#        for channel in ctx.guild.text_channels:
-#            async for message in channel.history():
-#                if message.author == user:
-#                    if message.attachments:
-#                        hackimg = message.attachments[0].url
-
-
         embed=discord.Embed(color=self.bot.embed_color)
         embed.set_image(url=hackimg)
-        await ctx.send(embed=embed)
+        await msg.edit(content=newmsg, embed=embed)
 
 
     @commandExtra(category="Funny")
