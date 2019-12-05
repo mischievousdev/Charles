@@ -9,7 +9,7 @@ from discord.ext import commands
 from datetime import datetime
 from PIL import Image
 from io import BytesIO
-from utils.default import commandExtra
+from utils.default import commandExtra, groupExtra
 from utils.translate import get_text
 
 class Fun(commands.Cog, name='Fun'):
@@ -173,45 +173,14 @@ class Fun(commands.Cog, name='Fun'):
                     except asyncio.TimeoutError:
                         pass
 
-    @commandExtra(category="Facts")
-    async def koalafact(self, ctx):
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get('https://some-random-api.ml/facts/koala') as r:
-                res = await r.json()
-                await ctx.send(res['fact'])
+    @commandExtra(category="Random", invoke_without_command=True)
+    async def fact(self, ctx, choice=None):
+        facts = ['koala', 'dog', 'cat', 'panda', 'fox', 'bird', 'racoon', 'kangaroo', 'elephant', 'whale', 'giraffe']
+        if not choice.lower() in facts:
+            return await ctx.send(f"You can get a random fact from the following animals:\n\n`{'` | `'.join(facts)}`\n\nUse the command like: `{ctx.prefix}fact animal`")
 
-    @commandExtra(category="Facts")
-    async def dogfact(self, ctx):
         async with aiohttp.ClientSession() as cs:
-            async with cs.get('https://some-random-api.ml/facts/dog') as r:
-                res = await r.json()
-                await ctx.send(res['fact'])
-
-    @commandExtra(category="Facts")
-    async def catfact(self, ctx):
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get('https://some-random-api.ml/facts/cat') as r:
-                res = await r.json()
-                await ctx.send(res['fact'])
-
-    @commandExtra(category="Facts")
-    async def foxfact(self, ctx):
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get('https://some-random-api.ml/facts/fox') as r:
-                res = await r.json()
-                await ctx.send(res['fact'])
-
-    @commandExtra(category="Facts")
-    async def pandafact(self, ctx):
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get('https://some-random-api.ml/facts/panda') as r:
-                res = await r.json()
-                await ctx.send(res['fact'])
-
-    @commandExtra(category="Facts")
-    async def birdfact(self, ctx):
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get('https://some-random-api.ml/facts/bird') as r:
+            async with cs.get(f'https://some-random-api.ml/facts/{choice.lower()}') as r:
                 res = await r.json()
                 await ctx.send(res['fact'])
 
