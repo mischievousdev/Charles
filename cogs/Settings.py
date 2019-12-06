@@ -148,7 +148,7 @@ class GuildSettings(commands.Cog, name="Settings"):
             d = json.load(f)
 
         if not i in d:
-            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.invalid_id'))
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.invalid_id'))
 
         msg = await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.delete_confirm').format(i))
         await msg.add_reaction("<:tickYes:315009125694177281>")
@@ -177,13 +177,13 @@ class GuildSettings(commands.Cog, name="Settings"):
         i = str(id)
 
         if not os.path.exists(f'db/backups/{str(ctx.author.id)}.json'):
-            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.no_backups'))
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.no_backups'))
 
         with open(f'db/backups/{str(ctx.author.id)}.json', 'r') as f:
             d = json.load(f)
 
         if not i in d:
-            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.invalid_id'))
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.invalid_id'))
 
         for entry in d[i]["Channels"]["Cat"]:
             entry["restore"] = True
@@ -210,13 +210,13 @@ class GuildSettings(commands.Cog, name="Settings"):
     @commandExtra(category="Server Backups", name="backup-list", aliases=['restore-list'])
     async def list_backups(self, ctx):
         if not os.path.exists(f'db/backups/{str(ctx.author.id)}.json'):
-            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.no_backups'))
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.no_backups'))
 
         with open(f'db/backups/{str(ctx.author.id)}.json', 'r') as f:
             d = json.load(f)
 
         if len(d) == 0:
-            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.no_backups'))
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.no_backups'))
 
         e = discord.Embed(color=self.bot.embed_color, title=get_text(ctx.guild, 'settings', 'settings.bu.made'))
         e.set_author(name=ctx.author, icon_url=ctx.author.avatar_url)
@@ -231,9 +231,6 @@ class GuildSettings(commands.Cog, name="Settings"):
         perms = dict(ctx.author.guild_permissions)
         if not perms['administrator'] == True:
             return await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.missing_perm'))
-
-        if not os.path.exists(f'db/backups/{str(ctx.author.id)}.json'):
-            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.no_backups'))
 
         if not os.path.exists(f'db/backups/{str(ctx.author.id)}.json'):
             f = open(f'db/backups/{str(ctx.author.id)}.json', 'x')

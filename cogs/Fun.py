@@ -18,7 +18,7 @@ class Fun(commands.Cog, name='Fun'):
         self.icon = "<:charlesClown:615429008745693184>"
         self.big_icon = "https://cdn.discordapp.com/emojis/615429008745693184.png"
 
-    @commandExtra(category="Games", hidden=True)
+    @commandExtra(category="Games")
     async def wtp(self, ctx):
         poke_id = random.randint(1, 802)
 
