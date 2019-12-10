@@ -17,9 +17,13 @@ class DiscordBotsOrgAPI(commands.Cog, name="DBL"):
         self.icon = ""
         self.big_icon = ""
 
+    @commands.Cog.listener()
+    async def on_dbl_test(self, data):
+        print(data)
 
     @commands.Cog.listener()
     async def on_dbl_vote(self, data):
+        print(data)
         channel = await self.bot.fetch_channel(562784997962940476)
         user = await self.bot.fetch_user(int(data['user']))
         await channel.send(f"{str(user)} has voted!")

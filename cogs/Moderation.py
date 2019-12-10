@@ -3,6 +3,7 @@ import re
 import aiohttp
 import asyncio
 import argparse
+import shlex
 
 from io import BytesIO
 from discord.ext import commands
