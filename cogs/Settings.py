@@ -723,6 +723,24 @@ class GuildSettings(commands.Cog, name="Settings"):
     async def leaving(self, ctx):
         pass
 
+    @leaving.command(name="delete-after")
+    async def delete_msg_after(self, ctx, time:int=None):
+        with open(f'db/guilds/{ctx.guild.id}.json', 'r') as f:
+            data = json.load(f)
+
+        if time is None:
+            data['Guild_Logs']['Leave_Msg']['Delete_After'] = None
+            msg = get_text(ctx.guild, 'settings', 'settings.leaving.delete_after_none')
+
+        else:
+            data['Guild_Logs']['Leave_Msg']['Delete_After'] = time
+            msg = get_text(ctx.guild, 'settings', 'settings.leaving.delete_after')
+
+        with open(f'db/guilds/{ctx.guild.id}.json', 'w') as f:
+            data = json.dump(data, f, indent=4)
+
+        await ctx.send(msg)
+
     @leaving.command()
     async def msg(self, ctx, *, message):
         with open(f'db/guilds/{ctx.guild.id}.json', 'r') as f:
@@ -830,6 +848,24 @@ class GuildSettings(commands.Cog, name="Settings"):
     @groupExtra(category="Welcoming/Leaving Messages")
     async def welcoming(self, ctx):
         pass
+
+    @welcoming.command(name="delete-after")
+    async def _delete_msg_after(self, ctx, time:int=None):
+        with open(f'db/guilds/{ctx.guild.id}.json', 'r') as f:
+            data = json.load(f)
+
+        if time is None:
+            data['Guild_Logs']['Welcome_Msg']['Delete_After'] = None
+            msg = get_text(ctx.guild, 'settings', 'settings.welcoming.delete_after_none')
+
+        else:
+            data['Guild_Logs']['Welcome_Msg']['Delete_After'] = time
+            msg = get_text(ctx.guild, 'settings', 'settings.welcoming.delete_after')
+
+        with open(f'db/guilds/{ctx.guild.id}.json', 'w') as f:
+            data = json.dump(data, f, indent=4)
+
+        await ctx.send(msg)
 
     @welcoming.command(name="msg")
     async def _msg(self, ctx, *, message):

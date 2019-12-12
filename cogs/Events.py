@@ -221,11 +221,13 @@ class Events(commands.Cog, name="Events"):
         data["Guild_Logs"]["MemberUpdate"]["Toggle"] = "disabled"
         data["Guild_Logs"]["MemberUpdate"]["channel"] = "None"
         data["Guild_Logs"]["Welcome_Msg"]["toggle"] = "disabled"
+        data["Guild_Logs"]["Welcome_Msg"]["Delete_After"] = None
         data["Guild_Logs"]["Welcome_Msg"]["embedtoggle"] = "disabled"
         data["Guild_Logs"]["Welcome_Msg"]["channel"] = "None"
         data["Guild_Logs"]["Welcome_Msg"]["msg"] = "Welcome to {{server.name}}, {{member.metion}}!"
         data["Guild_Logs"]["Welcome_Msg"]["embedmsg"] = {}
         data["Guild_Logs"]["Leave_Msg"]["toggle"] = "disabled"
+        data["Guild_Logs"]["Leave_Msg"]["Delete_After"] = None
         data["Guild_Logs"]["Leave_Msg"]["embedtoggle"] = "disabled"
         data["Guild_Logs"]["Leave_Msg"]["channel"] = "None"
         data["Guild_Logs"]["Leave_Msg"]["msg"] = "{{member.name}} has left the server..."
@@ -392,6 +394,8 @@ class Events(commands.Cog, name="Events"):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
+        if message.author.bot:
+            return
         # Create the embed
         embed=discord.Embed(title=get_text(message.guild, "events", "events.omd_msgdel"),
                             color=0xe94e51,
@@ -519,7 +523,10 @@ class Events(commands.Cog, name="Events"):
             text = text.replace("{{server.name}}", member.guild.name)
 
             channel = self.bot.get_channel(int(data["Guild_Logs"]["Welcome_Msg"]["channel"]))
-            await channel.send(text)
+            if data["Guild_Logs"]["Welcome_Msg"]["Delete_After"] == None:
+                await channel.send(text)
+            else:
+                await channel.send(text, delete_after=data["Guild_Logs"]["Welcome_Msg"]["Delete_After"])
 
         # Sending the embedded welcoming message
         if data["Guild_Logs"]["Welcome_Msg"]["embedtoggle"] == "enabled":
@@ -536,7 +543,10 @@ class Events(commands.Cog, name="Events"):
                     emb_dict["fields"] = self.placeholder_replacer(field["value"], member)
                     
             channel = self.bot.get_channel(int(data["Guild_Logs"]["Welcome_Msg"]["channel"]))
-            await channel.send(embed=discord.Embed.from_dict(emb_dict))
+            if data["Guild_Logs"]["Welcome_Msg"]["Delete_After"] == None:
+                await channel.send(embed=discord.Embed.from_dict(emb_dict))
+            else:
+                await channel.send(embed=discord.Embed.from_dict(emb_dict), delete_after=data["Guild_Logs"]["Welcome_Msg"]["Delete_After"])
 
         # Add a role to new members/bots
         if data["Guild_Logs"]["Join_Role"]["toggle"] == "enabled":
@@ -587,7 +597,10 @@ class Events(commands.Cog, name="Events"):
             text = text.replace("{{server.owner}}", self.bot.get_user(member.guild.owner_id).name)
 
             channel = self.bot.get_channel(int(data["Guild_Logs"]["Leave_Msg"]["channel"]))
-            await channel.send(text)
+            if data["Guild_Logs"]["Leave_Msg"]["Delete_After"] == None:
+                await channel.send(text)
+            else:
+                await channel.send(text, delete_after=data["Guild_Logs"]["Leave_Msg"]["Delete_After"])
 
         # Sending the embedded leaving message
         if data["Guild_Logs"]["Leave_Msg"]["embedtoggle"] == "enabled":
@@ -604,7 +617,11 @@ class Events(commands.Cog, name="Events"):
                     emb_dict["fields"] = self.placeholder_replacer(field["value"], member)
 
             channel = self.bot.get_channel(int(data["Guild_Logs"]["Leave_Msg"]["channel"]))
-            await channel.send(embed=discord.Embed.from_dict(emb_dict))
+
+            if data["Guild_Logs"]["Leave_Msg"]["Delete_After"] == None:
+                await channel.send(embed=discord.Embed.from_dict(emb_dict))
+            else:
+                await channel.send(embed=discord.Embed.from_dict(emb_dict), delete_after=data["Guild_Logs"]["Leave_Msg"]["Delete_After"])
 
         # Logs are disabled...
         else:
