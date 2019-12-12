@@ -206,7 +206,8 @@ class utility(commands.Cog, name="Utility"):
 
                 if done != True and emoji_check != True and role_check != False:
                     try:
-                        await emoji_msg.add_reaction(str(emoji_msg.content))
+                        emoji = await commands.EmojiConverter().convert(ctx, emoji_msg.content)
+                        await emoji_msg.add_reaction(emoji)
                         await ctx.send("Ok, let's use that emoji!", delete_after=5)
 
                         try:
@@ -224,7 +225,7 @@ class utility(commands.Cog, name="Utility"):
                                     await ctx.send("I could not set that as a reaction role. The position of that role is higher than or equal to my top role!", delete_after=5)
                                 else:
                                     await ctx.send(f"The role `{role.name}` has been set as reaction role for {str(emoji_msg.content)}")
-                                    emoji_dict[str(emoji_msg.content)] = role.id
+                                    emoji_dict[str(emoji)] = role.id
 
                                     if addmsg == "":
                                         addmsg += "Say `cancel` if you're done"
