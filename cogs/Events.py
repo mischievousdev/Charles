@@ -73,14 +73,8 @@ class Events(commands.Cog, name="Events"):
         if isinstance(err, errors.MissingRequiredArgument):
             await ctx.send_help(ctx.command)
 
-        if isinstance(err, errors.BadArgument):
+        elif isinstance(err, errors.BadArgument):
             await ctx.send_help(ctx.command)
-
-        elif isinstance(err.original, discord.Forbidden):
-            errormsg=discord.Embed(color=0xFF7070)
-            errormsg.add_field(name="<:warn:620414236010741783> **Permissions Error:** Insufficient permissions!",
-                               value="You do not have the permissions to execute this command.")
-            await ctx.send(embed=errormsg)
 
         elif isinstance(err, errors.CommandInvokeError):
             err = err.original
@@ -128,6 +122,11 @@ class Events(commands.Cog, name="Events"):
                                value=get_text(ctx.guild, "events", "events.oce_no_help"))
             await ctx.send(embed=errormsg)
 
+        elif isinstance(err.original, discord.Forbidden):
+            errormsg=discord.Embed(color=0xFF7070)
+            errormsg.add_field(name="<:warn:620414236010741783> **Permissions Error:** Insufficient permissions!",
+                               value="You do not have the permissions to execute this command.")
+            await ctx.send(embed=errormsg)
 
 
     @commands.Cog.listener()
@@ -478,36 +477,38 @@ class Events(commands.Cog, name="Events"):
                 if before in guild.members:
                     with open(f"db/guilds/{guild.id}.json", "r") as f:
                         data = json.load(f)
+
+                    # Logs are disabled...
+                    if data["Guild_Logs"]["MemberUpdate"]["Toggle"] == "disabled":
+                        continue
+
+                    # Logs are enabled!
+                    elif data["Guild_Logs"]["MemberUpdate"]["Toggle"] == "enabled":
+                        channel_id = int(data["Guild_Logs"]["MemberUpdate"]["Channel"])
+                        channel = guild.get_channel(channel_id)
+
+                        # Avatar changed
+                        if before.avatar != after.avatar:
+                            e = discord.Embed(color=self.bot.embed_color,
+                                              title=get_text(guild, "events", "events.ouu_avatar"),
+                                              timestamp=datetime.utcnow())
+                            e.set_author(name=after, icon_url=after.avatar_url)
+                            e.description = get_text(guild, "events", "events.ouu_avy_msg").format(after.name)
+                            e.set_thumbnail(url=after.avatar_url)
+                            #e.set_image(url=before.avatar_url)
+                            e.set_footer(text=get_text(guild, "events", "events.ouu_avy_id").format(after.id))
+                            await channel.send(embed=e)
+                            
+                        # Username changed
+                        if before.username != after.username:
+                            e = discord.Embed(color=self.bot.embed_color, title=get_text(guild, "events", "events.ouu_username"))
+                            e.set_author(name=after, icon_url=after.avatar_url)
+                            e.description = get_text(guild, "events", "events.ouu_name_msg").format(before.username, after.username)
+                            await channel.send(embed=e)
+
         except FileNotFoundError:
             return
 
-        # Logs are disabled...
-        if data["Guild_Logs"]["MemberUpdate"]["Toggle"] == "disabled":
-            return
-
-        # Logs are enabled!
-        elif data["Guild_Logs"]["MemberUpdate"]["Toggle"] == "enabled":
-            channel_id = int(data["Guild_Logs"]["MemberUpdate"]["Channel"])
-            channel = self.bot.get_channel(channel_id)
-
-            # Avatar changed
-            if before.avatar != after.avatar:
-                e = discord.Embed(color=self.bot.embed_color,
-                                  title=get_text(before.guild, "events", "events.ouu_avatar"),
-                                  timestamp=datetime.utcnow())
-                e.set_author(name=after, icon_url=after.avatar_url)
-                e.description = get_text(before.guild, "events", "events.ouu_avy_msg").format(after.name)
-                e.set_thumbnail(url=after.avatar_url)
-                #e.set_image(url=before.avatar_url)
-                e.set_footer(text=get_text(before.guild, "events", "events.ouu_avy_id"))
-                await channel.send(embed=e)
-                
-            # Username changed
-            if before.username != after.username:
-                e = discord.Embed(color=self.bot.embed_color, title=get_text(before.guild, "events", "events.ouu_username"))
-                e.set_author(name=after, icon_url=after.avatar_url)
-                e.description = get_text(before.guild, "events", "events.ouu_name_msg").format(before.username, after.username)
-                await channel.send(embed=e)
 
     @commands.Cog.listener()
     async def on_member_join(self, member):

@@ -1,5 +1,7 @@
 import discord
 import json
+import asyncio
+import aiohttp
 import os
 import datetime
 import random
@@ -298,14 +300,14 @@ class GuildSettings(commands.Cog, name="Settings"):
         i = str(id)
 
         if len(g.channels) > 0:
-            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.restore.channels'))
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.restore.channels_error'))
 
-        if len(g.roles) > 0:
-            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.restore.roles'))
+        if len(g.roles) > 5:
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.restore.roles_error'))
 
 
         if len(g.emojis) > 0:
-            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.restore.emoji'))
+            return await ctx.send(get_text(ctx.guild, 'settings', 'settings.restore.emoji_error'))
         if not os.path.exists(f'db/backups/{str(ctx.author.id)}.json'):
             return await ctx.send(get_text(ctx.guild, 'settings', 'settings.bu.no_backups'))
 
@@ -1123,7 +1125,14 @@ class GuildSettings(commands.Cog, name="Settings"):
         """Disable the given command. A few important main commands have been blocked from disabling for obvious reasons"""
         file_name= "db/cmd_checks/" + str(ctx.guild.id) + ".json"
         cant_disable = ["help", "jishaku", "disable-command", "enable-command", "toggle-module", "toggle-category", "modules", "categories"]
-        cmd = self.bot.get_command(command)
+
+        if command.title() in self.bot.cogs.keys():
+            return await ctx.send(get_text(ctx.guild, "settings", "settings.cmd_is_cog").format(command, ctx.prefix))
+
+        cmd = self.bot.get_command(command.strip("<>"))
+
+        if cmd is None:
+            return await ctx.send(get_text(ctx.guild, "settings", "settings.cmd_not_found").format(command.strip("<>")))
 
         with open(file_name, "r") as f:
             data = json.load(f)
@@ -1162,7 +1171,14 @@ class GuildSettings(commands.Cog, name="Settings"):
     async def enablecmd(self, ctx, *, command):
         """Enables a disabled command"""
         file_name= "db/cmd_checks/" + str(ctx.guild.id) + ".json"
-        cmd = self.bot.get_command(command)
+
+        if command.title() in self.bot.cogs.keys():
+            return await ctx.send(get_text(ctx.guild, "settings", "settings.cmd_is_cog").format(command, ctx.prefix))
+
+        cmd = self.bot.get_command(command.strip("<>"))
+
+        if cmd is None:
+            return await ctx.send(get_text(ctx.guild, "settings", "settings.cmd_not_found").format(command.strip("<>")))
 
         with open(file_name, "r") as f:
             data = json.load(f)
