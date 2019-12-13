@@ -19,6 +19,7 @@ from datetime import datetime
 from collections import Counter
 from utils.translate import get_text
 from utils.default import commandExtra, groupExtra
+from utils.ProgressBar import create as make_pb
 
 class info(commands.Cog, name='Info'):
     def __init__(self, bot):
@@ -455,33 +456,16 @@ class info(commands.Cog, name='Info'):
                     #centered = "⠀"*int(25 - len(txt)/2) + txt
                     #return centered
 
-            if not ctx.author.is_on_mobile():
-                if ctx.guild.premium_subscription_count is not None:
-                    boostmsg = get_text(ctx.guild, 'info', 'info.boost_count').format('⠀'*int(9), ctx.guild.premium_subscription_count)
-                    boostmsg += "\n`{0}{1}`\n".format('\U00002588'*(int(ctx.guild.premium_subscription_count if ctx.guild.premium_subscription_count <= 30 else 30)), '⠀'*(30-(int(round(ctx.guild.premium_subscription_count)))))
-                    boostmsg += "`⠀|⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀|⠀⠀⠀⠀⠀⠀  ⠀⠀⠀⠀⠀⠀|`\n"
-                    boostmsg += "Lvl 1⠀⠀⠀⠀⠀⠀⠀⠀Lvl 2⠀⠀⠀⠀⠀⠀⠀⠀⠀Lvl 3\n"
-                    boostmsg += "{0}".format(next_level_calc(ctx))
+            boostmsg = "0⠀" + make_pb(30, 2, (ctx.guild.premium_subscription_count if ctx.guild.premium_subscription_count <= 30 else 30)) + "⠀30"
+            boostmsg += f"\n\n{get_text(ctx.guild, 'info', 'info.boost_count').format(ctx.guild.premium_subscription_count)}"
+            boostmsg += "\n{0}".format(next_level_calc(ctx))
 
-                    last_boost = max(ctx.guild.members, key=lambda m: m.premium_since or ctx.guild.created_at)
-                    if last_boost.premium_since is not None:
-                        boosts = f"{get_text(ctx.guild, 'info', 'info.last_boost')} {last_boost} ({humanize.naturaltime(last_boost.premium_since)})"
-                        #centered = "⠀"*int(27 - len(boosts)/2) + boosts
-                        boostmsg += f"\n{boosts}"
+            last_boost = max(ctx.guild.members, key=lambda m: m.premium_since or ctx.guild.created_at)
+            if last_boost.premium_since is not None:
+                boosts = f"{get_text(ctx.guild, 'info', 'info.last_boost')} {last_boost} ({humanize.naturaltime(last_boost.premium_since)})"
+                boostmsg += f"\n{boosts}"
 
-                    embed.add_field(name=get_text(ctx.guild, 'info', 'info.boosts'), value=boostmsg, inline=False)
-                else:
-                    embed.add_field(name=get_text(ctx.guild, 'info', 'info.boosts'), value=f"{'⠀'*18} {get_text(ctx.guild, 'info', 'info.no_boosts')} \n`{'⠀'*50}`\n⠀|  ⠀⠀⠀⠀⠀|  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀|\nLvl 1⠀⠀⠀Lvl 2⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀Lvl 3\n{'⠀'*14}Next level in 2 boosts') #.format('⠀'*21, '⠀'*50, '⠀'*14)")
-            else:
-                if ctx.guild.premium_subscription_count is not None:
-
-                    last_boost = max(ctx.guild.members, key=lambda m: m.premium_since or ctx.guild.created_at)
-                    boosts = f"{get_text(ctx.guild, 'info', 'info.last_boost')} {last_boost} ({humanize.naturaltime(last_boost.premium_since)})"
-
-                    embed.add_field(name=get_text(ctx.guild, 'info', 'info.boosts'), value=f"{get_text(ctx.guild, 'info', 'info.boosts')}: {ctx.guild.premium_subscription_count}\n"
-                                                         f"{get_text(ctx.guild, 'info', 'info.boost_level')} {ctx.guild.premium_tier}\n"
-                                                         f"{next_level_calc(ctx)}"
-                                                         f"\n{boosts if last_boost.premium_since is not None else ''}")
+            embed.add_field(name=get_text(ctx.guild, 'info', 'info.boosts'), value=boostmsg, inline=False)
 
             embed.add_field(name=get_text(ctx.guild, 'info', 'info.server_roles').format(int(len(ctx.guild.roles) -1)), value=roles[:-2])
             await ctx.send(content=f"<:info:603362826358095922> {get_text(ctx.guild, 'info', 'info.info_about').format(ctx.guild.name)}", embed=embed)

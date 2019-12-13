@@ -103,6 +103,11 @@ class Events(commands.Cog, name="Events"):
             errormsg.add_field(name="<:warn:620414236010741783> **Permissions Error:** Insufficient permissions!", value="You do not have the permissions to ececute this command.")
             await ctx.send(embed=errormsg)
 
+        elif isinstance(err, errors.BotMissingPermissions):
+            errormsg=discord.Embed(color=0xFF7070)
+            errormsg.add_field(name="<:warn:620414236010741783> **Permissions Error:** Insufficient permissions!", value=f"I am missing permissions to run this command: {err}")
+            await ctx.send(embed=errormsg)
+
         elif isinstance(err, errors.CommandOnCooldown):
             retry_after = f"{err.retry_after:.0f}"
             cdem=discord.Embed(color=0xf89a16)
@@ -127,6 +132,7 @@ class Events(commands.Cog, name="Events"):
             errormsg.add_field(name="<:warn:620414236010741783> **Permissions Error:** Insufficient permissions!",
                                value="You do not have the permissions to execute this command.")
             await ctx.send(embed=errormsg)
+
 
 
     @commands.Cog.listener()

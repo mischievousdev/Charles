@@ -2,6 +2,7 @@ import asyncio
 
 import discord
 from discord.ext.commands import Paginator as CommandPaginator
+from discord.ext import commands
 
 
 class CannotPaginate(Exception):
@@ -62,18 +63,18 @@ class Pages:
             self.permissions = self.channel.permissions_for(ctx.bot.user)
 
         if not self.permissions.embed_links:
-            raise CannotPaginate('Bot does not have embed links permission.')
+            raise commands.BotMissingPermissions('I do not have permissions to embed links.')
 
         if not self.permissions.send_messages:
-            raise CannotPaginate('Bot cannot send messages.')
+            raise commands.BotMissingPermissions('Bot cannot send messages.')
 
         if self.paginating:
             # verify we can actually use the pagination session
             if not self.permissions.add_reactions:
-                raise CannotPaginate('Bot does not have add reactions permission.')
+                raise commands.BotMissingPermissions('I do not have permissions to add reactions.')
 
             if not self.permissions.read_message_history:
-                raise CannotPaginate('Bot does not have Read Message History permission.')
+                raise commands.BotMissingPermissions('I do not have permissions to Read Message History.')
 
     def get_page(self, page):
         base = (page - 1) * self.per_page
