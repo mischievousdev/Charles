@@ -456,14 +456,14 @@ class info(commands.Cog, name='Info'):
                     #centered = "⠀"*int(25 - len(txt)/2) + txt
                     #return centered
 
-            boostmsg = "0⠀" + make_pb(30, 2, (ctx.guild.premium_subscription_count if ctx.guild.premium_subscription_count <= 30 else 30)) + "⠀30"
-            boostmsg += f"\n\n{get_text(ctx.guild, 'info', 'info.boost_count').format(ctx.guild.premium_subscription_count)}"
+            boostmsg = f"{get_text(ctx.guild, 'info', 'info.boost_count').format(ctx.guild.premium_subscription_count)}"
             boostmsg += "\n{0}".format(next_level_calc(ctx))
 
             last_boost = max(ctx.guild.members, key=lambda m: m.premium_since or ctx.guild.created_at)
             if last_boost.premium_since is not None:
                 boosts = f"{get_text(ctx.guild, 'info', 'info.last_boost')} {last_boost} ({humanize.naturaltime(last_boost.premium_since)})"
                 boostmsg += f"\n{boosts}"
+            boostmsg += "\n\n0⠀" + make_pb(30, 2, (ctx.guild.premium_subscription_count if ctx.guild.premium_subscription_count <= 30 else 30)) + "⠀30"
 
             embed.add_field(name=get_text(ctx.guild, 'info', 'info.boosts'), value=boostmsg, inline=False)
 
