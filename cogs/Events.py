@@ -127,6 +127,9 @@ class Events(commands.Cog, name="Events"):
                                value=get_text(ctx.guild, "events", "events.oce_no_help"))
             await ctx.send(embed=errormsg)
 
+        elif isinstance(err, errors.CheckFailure):
+            pass
+
         elif isinstance(err.original, discord.Forbidden):
             errormsg=discord.Embed(color=0xFF7070)
             errormsg.add_field(name="<:warn:620414236010741783> **Permissions Error:** Insufficient permissions!",
