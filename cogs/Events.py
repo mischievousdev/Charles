@@ -506,10 +506,10 @@ class Events(commands.Cog, name="Events"):
                             await channel.send(embed=e)
                             
                         # Username changed
-                        if before.username != after.username:
+                        if before.name != after.name:
                             e = discord.Embed(color=self.bot.embed_color, title=get_text(guild, "events", "events.ouu_username"))
                             e.set_author(name=after, icon_url=after.avatar_url)
-                            e.description = get_text(guild, "events", "events.ouu_name_msg").format(before.username, after.username)
+                            e.description = get_text(guild, "events", "events.ouu_name_msg").format(before.name, after.name)
                             await channel.send(embed=e)
 
         except FileNotFoundError:

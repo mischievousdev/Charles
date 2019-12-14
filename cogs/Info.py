@@ -402,7 +402,6 @@ class info(commands.Cog, name='Info'):
             embed.add_field(name=get_text(ctx.guild, 'info', 'info.server_owner'), value=ctx.guild.owner, inline=True)
             embed.add_field(name=get_text(ctx.guild, 'info', 'info.server_region'), value=ctx.guild.region, inline=True)
             embed.add_field(name=get_text(ctx.guild, 'info', 'info.created'), value=default.date(ctx.guild.created_at), inline=True)
-            embed.add_field(name=get_text(ctx.guild, 'info', 'info.server_verification'), value=str(ctx.guild.verification_level).capitalize())
            
             info = []
             features = set(ctx.guild.features)
@@ -423,38 +422,28 @@ class info(commands.Cog, name='Info'):
             if info:
                 embed.add_field(name=get_text(ctx.guild, 'info', 'info.features'), value=',\n'.join(info))
 
+            embed.add_field(name=get_text(ctx.guild, 'info', 'info.server_verification'), value=str(ctx.guild.verification_level).capitalize())
 
             def next_level_calc(ctx):
                 if str(ctx.guild.premium_tier) == "0":
                     count = int(2 - ctx.guild.premium_subscription_count)
                     txt = get_text(ctx.guild, 'info', 'info.next_level_in').format(count)
-                    #if ctx.author.is_on_mobile():
                     return txt
-                    #centered = "⠀"*int(25 - len(txt)/2) + txt 
-                    #return centered
 
                 if str(ctx.guild.premium_tier) == "1":
                     count = int(15 - ctx.guild.premium_subscription_count)
                     txt = get_text(ctx.guild, 'info', 'info.next_level_in').format(count)
-                    #if ctx.author.is_on_mobile():
                     return txt
-                    #centered = "⠀"*int(25 - len(txt)/2) + txt
-                    #return centered
+
 
                 if str(ctx.guild.premium_tier) == "2":
                     count = int(30 - ctx.guild.premium_subscription_count)
                     txt = get_text(ctx.guild, 'info', 'info.next_level_in').format(count)
-                    #if ctx.author.is_on_mobile():
                     return txt
-                    #centered = "⠀"*int(25 - len(txt)/2) + txt
-                    #return centered
 
                 if str(ctx.guild.premium_tier) == "3":
                     txt = get_text(ctx.guild, 'info', 'info.max_level')
-                    #if ctx.author.is_on_mobile():
                     return txt
-                    #centered = "⠀"*int(25 - len(txt)/2) + txt
-                    #return centered
 
             boostmsg = f"{get_text(ctx.guild, 'info', 'info.boost_count').format(ctx.guild.premium_subscription_count)}"
             boostmsg += "\n{0}".format(next_level_calc(ctx))
