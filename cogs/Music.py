@@ -1021,11 +1021,11 @@ class Music(commands.Cog, name="Music"):
 
         tracklist = tracks[:10]  # First 10 results
 
-        o = ''
+        o = []
         for index, track in enumerate(tracklist, start=1):
-            o += f'`{index}.` [{track.title}]({track.uri})\n'
+            o.append(f'`{index}.` [{track.title}]({track.uri})')
 
-        embed = discord.Embed(color=self.bot.embed_color, description=o)
+        embed = discord.Embed(color=self.bot.embed_color, description="\n".join(o))
         msg = await ctx.send(content=get_text(ctx.guild, 'music', 'music.find_confirm'), embed=embed)
 
         def check(m):
