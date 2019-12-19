@@ -132,7 +132,7 @@ class GuildSettings(commands.Cog, name="Settings"):
             toggle = get_text(ctx.guild, 'settings', 'settings.t_off')
         elif d["Guild_Info"]["Modules"][module.title()]["Toggle"] == False:
             d["Guild_Info"]["Modules"][module.title()]["Toggle"] = True
-            toggle = get_text(ctx.guild, 'settings', 'settings.t_off')
+            toggle = get_text(ctx.guild, 'settings', 'settings.t_on')
 
         with open(f"db/guilds/{ctx.guild.id}.json", "w") as f:
             json.dump(d, f, indent=4)
@@ -297,6 +297,8 @@ class GuildSettings(commands.Cog, name="Settings"):
     @commandExtra(category="Server Backups")
     async def restore(self, ctx, id:int, guild:int):
         g = self.bot.get_guild(guild)
+        if g is None:
+            return await ctx.send("Could not find a guild with that ID. Are you sure I am in that guild?")
         i = str(id)
 
         if len(g.channels) > 0:
@@ -497,6 +499,9 @@ class GuildSettings(commands.Cog, name="Settings"):
             return await ctx.send(get_text(ctx.guild, 'settings', 'settings.fix.cant_fix'))
 
         g = self.bot.get_guild(d[i]["Guild-ID"])
+        if g is None:
+            return await ctx.send("I could not find the guild this backup was ysed in. Are you sure I am (still) in that guild?")
+
         if g.owner_id != ctx.author.id:
             return await ctx.send(get_text(ctx.guild, 'settings', 'settings.restore.not_owner'))
 

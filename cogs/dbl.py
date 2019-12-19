@@ -19,7 +19,10 @@ class DiscordBotsOrgAPI(commands.Cog, name="DBL"):
 
     @commands.Cog.listener()
     async def on_dbl_test(self, data):
-        print(data)
+        try:
+            print(data)
+        except Exception as e:
+            print(e)
 
     @commands.Cog.listener()
     async def on_dbl_vote(self, data):

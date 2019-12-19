@@ -693,7 +693,7 @@ class Music(commands.Cog, name="Music"):
                 try:
                     await controller_msg.edit(embed=await Player.lyrics_page(self=player, ctx=ctx))
                 except AttributeError:
-                    await controller_msg.edit(emned=discord.embed(color=self.bot.embed_color, description=get_text(ctx.guild, 'music', 'music.lyric_not_found')))
+                    await controller_msg.edit(emned=discord.Embed(color=self.bot.embed_color, description=get_text(ctx.guild, 'music', 'music.lyric_not_found')))
 
 
     @music_check(no_channel=True, bot_no_channel=True, same_channel=True, not_playing=True)
@@ -1004,7 +1004,7 @@ class Music(commands.Cog, name="Music"):
         else:
             await ctx.send(embed=discord.Embed(color=self.bot.embed_color, description=f"<:forwards:600682023832518657> " + get_text(ctx.guild, 'music', 'music.pos_for').format(ctx.author.mention, newpos)), delete_after=5)
 
-    @checks.has_voted()
+    #@checks.has_voted()
     @music_check(no_channel=True, bot_no_channel=True, same_channel=True)
     @commandExtra(category="Player Controls")
     async def find(self, ctx, *, query):
@@ -1029,7 +1029,7 @@ class Music(commands.Cog, name="Music"):
         msg = await ctx.send(content=get_text(ctx.guild, 'music', 'music.find_confirm'), embed=embed)
 
         def check(m):
-            return ctx.author == m.author
+            return ctx.author == m.author and m.content in ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10')
 
         msgcheck = msg.embeds[0]
         desc_lines = msgcheck.description.splitlines()
@@ -1038,22 +1038,18 @@ class Music(commands.Cog, name="Music"):
 
         checkmsg = checking.content.strip('.')
 
-        for entry in desc_lines:
-            if entry.startswith(f'`{checkmsg}.`'):
-                #line_a = entry[6:-46] ---- Search by track name
-                line = entry[-43:-1] # ---- Search by track uri
-                tracks = await self.bot.wavelink.get_tracks(query)
-                track = tracks[0]
-                await player.queue.put(Track(track.id, track.info, ctx=ctx))
+        tracks = await self.bot.wavelink.get_tracks(tracklist[int(checkmsg.content)+1])
+        track = tracks[0]
+        await player.queue.put(Track(track.id, track.info, ctx=ctx))
 
-                if not player.is_connected:
-                    return await ctx.send(get_text(ctx.guild, 'music', 'music.bot_not_connected'))
+        if not player.is_connected:
+            return await ctx.send(get_text(ctx.guild, 'music', 'music.bot_not_connected'))
 
-                embed = discord.Embed(color=self.bot.embed_color)
-                embed.title = "<:music:600682025284010025> " + get_text(ctx.guild, 'music', 'music.track_added')
-                embed.description = f"[{track.title}]({track.uri})"
-                embed.set_thumbnail(url=track.thumb)
-                await ctx.send(embed=embed, delete_after=15)
+        embed = discord.Embed(color=self.bot.embed_color)
+        embed.title = "<:music:600682025284010025> " + get_text(ctx.guild, 'music', 'music.track_added')
+        embed.description = f"[{track.title}]({track.uri})"
+        embed.set_thumbnail(url=track.thumb)
+        await ctx.send(embed=embed, delete_after=15)
 
 
     @commands.is_owner()

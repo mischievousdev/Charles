@@ -33,7 +33,7 @@ class Pages:
     permissions: discord.Permissions
         Our permissions for the channel.
     """
-    def __init__(self, ctx, *, entries, per_page=12, show_entry_count=True, title=None, thumbnail=None, footericon=None, footertext=None, author=None, embed_color = discord.Color.blurple()):
+    def __init__(self, ctx, *, entries, per_page=12, show_entry_count=True, embed_color = discord.Color.blurple(), title=None, thumbnail=None, footericon=None, footertext=None, author=None, delete_after=None):
         self.bot = ctx.bot
         self.entries = entries
         self.message = ctx.message
@@ -43,6 +43,7 @@ class Pages:
         self.footericon = footericon
         self.footertext = footertext
         self.title = title
+        self.delete_after = delete_after
         self.per_page = per_page
         pages, left_over = divmod(len(self.entries), self.per_page)
         if left_over:
@@ -52,9 +53,11 @@ class Pages:
         self.paginating = len(entries) > per_page
         self.show_entry_count = show_entry_count
         self.reaction_emojis = [
+            ('\U000023ee\U0000fe0f', self.first_page),
             ('\N{BLACK LEFT-POINTING TRIANGLE}', self.previous_page),
             ('\U000023f9', self.stop_pages),
             ('\N{BLACK RIGHT-POINTING TRIANGLE}', self.next_page),
+            ('\U000023ed\U0000fe0f', self.last_page)
         ]
 
         if ctx.guild is not None:
@@ -233,7 +236,7 @@ class Pages:
 
         while self.paginating:
             try:
-                reaction, user = await self.bot.wait_for('reaction_add', check=self.react_check, timeout=60.0)
+                reaction, user = await self.bot.wait_for('reaction_add', check=self.react_check, timeout=self.delete_after)
             except asyncio.TimeoutError:
                 self.paginating = False
                 try:
