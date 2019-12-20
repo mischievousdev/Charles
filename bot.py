@@ -22,7 +22,7 @@ from discord.ext import commands
 
 async def get_prefix(bot, message):
     if not message.guild:
-        custom_prefix = ""
+        custom_prefix = [""]
 
         return custom_prefix
 
@@ -35,10 +35,10 @@ async def get_prefix(bot, message):
             custom_prefix = data["Guild_Info"]["Prefix"]
 
         except FileNotFoundError:
-            custom_prefix = "c?"
+            custom_prefix = ["c?"]
 
 
-        return custom_prefix
+        return commands.when_mentioned_or(*custom_prefix)(bot, message)
 
 BOT_EXTENSIONS = [
     'cogs.Help',

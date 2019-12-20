@@ -17,6 +17,8 @@ class Events(commands.Cog, name="Events"):
         self.icon = ""
         self.big_icon = ""
     
+################################################################################################
+
     def placeholder_replacer(self, emb_dict, member):
         for thing in emb_dict:
             if isinstance(emb_dict[thing], str):
@@ -29,6 +31,8 @@ class Events(commands.Cog, name="Events"):
                 emb_dict[thing] = emb_dict[thing].replace("{{server.owner}}", self.bot.get_user(member.guild.owner_id).name)
         return emb_dict
     
+################################################################################################
+
     async def bot_check(self, ctx):
         with open("db/botblocked.json", "r") as f:
             data = json.load(f)
@@ -39,9 +43,13 @@ class Events(commands.Cog, name="Events"):
         else:
             return True
 
+################################################################################################
+
     @commands.Cog.listener()
     async def on_command(self, ctx):
         print(f"{ctx.guild.name} | {ctx.author} > {ctx.message.content}")
+
+################################################################################################
 
     @commands.Cog.listener()
     async def on_command_completion(self, ctx):
@@ -68,6 +76,8 @@ class Events(commands.Cog, name="Events"):
         else:
             self.bot.guildUsage[str(ctx.guild.id)] += 1
     
+################################################################################################
+
     @commands.Cog.listener()
     async def on_command_error(self, ctx, err):
         if isinstance(err, errors.MissingRequiredArgument):
@@ -92,31 +102,31 @@ class Events(commands.Cog, name="Events"):
             logemb.add_field(name="Server Info", value=f"**Server:** {ctx.guild.name}\n**Server ID:** {ctx.guild.id}\n**Channel:** {ctx.channel.name}\n**Channel ID:** {ctx.channel.id}")
             logemb.add_field(name="Command Info", value=f"**Invoked by:** {ctx.author}\n**Author ID:** {ctx.author.id}\n**Command:** {cmd}\n**Prefix:** {ctx.prefix}")
             logemb.add_field(name="Full command message", value=ctx.message.clean_content)
-            logemb.add_field(name="__Error:__", value=error)
+            logemb.add_field(name="__**Error:**__", value=error)
             await errorlog.send(embed=logemb)
 
-            errormsg=discord.Embed(color=0xFF7070)
-            errormsg.add_field(name="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_ic_title"),
-                               value=get_text(ctx.guild, "events", "events.oce_ic"))
+            errormsg=discord.Embed(color=0xFF7070,
+                                   title="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_ic_title"),
+                                   description=get_text(ctx.guild, "events", "events.oce_ic").format(type(err).__name__, err))
             await ctx.send(embed=errormsg)
 
         elif isinstance(err, errors.MissingPermissions):
-            errormsg=discord.Embed(color=0xFF7070)
-            errormsg.add_field(name="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_no_title"),
-                               value=get_text(ctx.guild, "events", "events.oce_user_no_perms"))
+            errormsg=discord.Embed(color=0xFF7070,
+                                   title="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_no_title"),
+                                   description=get_text(ctx.guild, "events", "events.oce_user_no_perms"))
             await ctx.send(embed=errormsg)
 
         elif isinstance(err, errors.BotMissingPermissions):
-            errormsg=discord.Embed(color=0xFF7070)
-            errormsg.add_field(name="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_no_title"),
-                               value=get_text(ctx.guild, "events", "events.oce_bot_no_perms") + f"\n\n{err}")
+            errormsg=discord.Embed(color=0xFF7070,
+                                   title="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_no_title"),
+                                   description=get_text(ctx.guild, "events", "events.oce_bot_no_perms") + f"\n\n{err}")
             await ctx.send(embed=errormsg)
 
         elif isinstance(err, errors.CommandOnCooldown):
             retry_after = f"{err.retry_after:.0f}"
-            cdem=discord.Embed(color=0xf89a16)
-            cdem.add_field(name="<a:timing:522948753368416277> " + get_text(ctx.guild, "events", "events.oce_coc_title"),
-                           value=get_text(ctx.guild, "events", "events.oce_coc_help").format(str(retry_after)))
+            cdem=discord.Embed(color=0xf89a16,
+                               title="<a:timing:522948753368416277> " + get_text(ctx.guild, "events", "events.oce_coc_title"),
+                               description=get_text(ctx.guild, "events", "events.oce_coc_help").format(str(retry_after)))
             await ctx.send(embed=cdem)
 
             logchan = self.bot.get_channel(530458521125257217)
@@ -126,21 +136,21 @@ class Events(commands.Cog, name="Events"):
             pass
 
         elif isinstance(err, errors.NotOwner):
-            errormsg=discord.Embed(color=0xFF7070)
-            errormsg.add_field(name="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_no_title"),
-                               value=get_text(ctx.guild, "events", "events.oce_no_help"))
+            errormsg=discord.Embed(color=0xFF7070,
+                                   title="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_no_title"),
+                                   description=get_text(ctx.guild, "events", "events.oce_no_help"))
             await ctx.send(embed=errormsg)
 
         elif isinstance(err, errors.CheckFailure):
             pass
 
         elif isinstance(err.original, discord.Forbidden):
-            errormsg=discord.Embed(color=0xFF7070)
-            errormsg.add_field(name="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_no_title"),
-                               value=get_text(ctx.guild, "events", "events.oce_user_no_perms"))
+            errormsg=discord.Embed(color=0xFF7070,
+                                   title="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_no_title"),
+                                   description=get_text(ctx.guild, "events", "events.oce_user_no_perms"))
             await ctx.send(embed=errormsg)
 
-
+################################################################################################
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -289,7 +299,7 @@ class Events(commands.Cog, name="Events"):
             if discord.emoji:
                 all += str(emoji)
 
-        e=discord.Embed(title="Joined a new guild!", color=self.bot.embed_color)
+        e=discord.Embed(title="Joined a new guild!", color=0x307EC4)
         e.set_thumbnail(url=guild.icon_url)
         e.description=f"**Guild name:** {guild.name}\n**Guild owner:** {owner}\n**Guild ID:** {guild.id}\n\n{members} members\n{tch} text channels\n{vch} voice channels\n\n__**Custom emoji:**__\n{all}"
         await logchannel.send(embed=e)
@@ -298,6 +308,7 @@ class Events(commands.Cog, name="Events"):
         async with aiohttp.ClientSession() as cs: 
             await cs.post('https://discordextremelist.xyz/api/bot/505532526257766411', headers={"Authorization": tokens.DEL}, data={"guildCount": len(self.bot.guilds)})
 
+################################################################################################
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
@@ -305,7 +316,7 @@ class Events(commands.Cog, name="Events"):
 
         members = len(guild.members)
 
-        e=discord.Embed(title="Left a guild...", color=self.bot.embed_color)
+        e=discord.Embed(title="Left a guild...", color=0x307EC4)
         e.set_thumbnail(url=guild.icon_url)
         e.description=f"**Guild name:** {guild.name}\n{members} members"
         await logchannel.send(embed=e)
@@ -318,61 +329,52 @@ class Events(commands.Cog, name="Events"):
         async with aiohttp.ClientSession() as cs:
             await cs.post('https://discordextremelist.xyz/api/bot/505532526257766411', headers={"Authorization": tokens.DEL}, data={"guildCount": len(self.bot.guilds)})
 
+################################################################################################
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        if message.author is self.bot.user:
+            return
 
-        log_mention = True
+        # We dont want to listen to commands
+        ctx = await self.bot.get_context(message)
+        if ctx.valid:
+            return
 
-        # User is blacklisted from our dms
+        # Check if user is blacklisted from our dms
         blacklisteddms = [514849447646199819, 514609909556314123]
         if not message.guild and message.author.id in blacklisteddms:
             blockeddm=discord.Embed(description="<:banhammer:523695899726053377> **BANNED!**", color=0xff1414)
             blockeddm.set_footer(text="You have been blocked from my dm's. If you want to appeal your ban, contact my owner! | Dutchy#6127")
-            await message.author.send(embed=blockeddm)
-        else:
-            botid = self.bot.get_user(505532526257766411)
-            if message.author is not botid:
-                if message.guild is None:
-                    if message.content.lower().startswith("c?"):
-                        return await message.author.send("Hey there! In my DMs you can use commands without a prefix :)")
-                    ctx = await self.bot.get_context(message)
-                    if ctx.valid:
-                        pass
-                    else:
-                        # Let's log their dm!
-                        msglog = self.bot.get_channel(520042138264797185)
-                        msgembed = discord.Embed(title="New DM:", description=message.content, color=0x0a97f5)
-                        msgembed.set_author(name=message.author, icon_url=message.author.avatar_url)
-                        if message.attachments:
-                            attachment_url = message.attachments[0].url
-                            msgembed.set_image(url=attachment_url)
-                        msgembed.set_footer(text=f"User ID: {message.author.id}")
-                        await msglog.send(embed=msgembed)
+            return await message.author.send(embed=blockeddm)
 
-        # If the message was only a mention, send prefix(es)
-        if message.content == "<@505532526257766411>" or message.content == "<@!505532526257766411>":
-            log_mention = False
-            with open(f"db/guilds/{message.guild.id}.json", "r") as f:
-                data = json.load(f)
+        # Something happens in DMs
+        if message.guild is None:
 
-            if len(data["Guild_Info"]["Prefix"]) == 1:
-                pre = '`, `'.join(data["Guild_Info"]["Prefix"])
-                await message.channel.send(get_text(message.guild, "settings", "settings.prefix").format(pre))
-            
-            if len(data["Guild_Info"]["Prefix"]) > 1:
-                pre = '`, `'.join(data["Guild_Info"]["Prefix"])
-                await message.channel.send(get_text(message.guild, "settings", "settings.prefixes").format(pre))
+            # They tried to use a command with default prefix
+            if message.content.lower().startswith("c?"):
+                return await message.author.send("Hey there! In my DMs you can use commands without a prefix :)")
 
+            # They sent an actual message to the bot!
+            logchannel = self.bot.get_channel(520042138264797185)
+            msgembed = discord.Embed(title="New DM:", description=message.content, color=0x0a97f5)
+            msgembed.set_author(name=message.author, icon_url=message.author.avatar_url)
+            if message.attachments:
+                attachment_url = message.attachments[0].url
+                msgembed.set_image(url=attachment_url)
+            msgembed.set_footer(text=f"User ID: {message.author.id}")
+            await logchannel.send(embed=msgembed)
 
         # We were mentioned, let's log that too
-        if self.bot.user.mentioned_in(message) and message.mention_everyone is False and log_mention == True:
-            msglog = self.bot.get_channel(520042178513207297)
+        if self.bot.user.mentioned_in(message) and message.mention_everyone is False:
+            mentionlog = self.bot.get_channel(520042178513207297)
             msgembed = discord.Embed(title="New Mention:", description=message.content, color=0x0a97f5)
             msgembed.set_author(name=message.author, icon_url=message.author.avatar_url)
             msgembed.add_field(name="Mention Info:", value=f"From server: {message.author.guild}\nServer ID: {message.author.guild.id}\n\nSent by: {message.author.name}\nUser ID: {message.author.id}\n\nSent in: #{message.channel.name}")
             msgembed.set_footer(text=f"Channel ID: {message.channel.id}")
-            await msglog.send(embed=msgembed)
+            return await mentionlog.send(embed=msgembed)
+
+################################################################################################
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
@@ -403,6 +405,8 @@ class Events(commands.Cog, name="Events"):
                 await channel.send(embed=embed)
         except FileNotFoundError:
             return
+
+################################################################################################
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
@@ -445,6 +449,8 @@ class Events(commands.Cog, name="Events"):
         except FileNotFoundError:
             return
 
+################################################################################################
+
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
         # Don't listen to bots
@@ -477,6 +483,7 @@ class Events(commands.Cog, name="Events"):
                 e.set_footer(text=get_text(before.guild, "events", "events.omu_id").format(before.id))
                 await channel.send(embed=e)
 
+################################################################################################
 
     @commands.Cog.listener()
     async def on_user_update(self, before, after):
@@ -522,6 +529,7 @@ class Events(commands.Cog, name="Events"):
         except FileNotFoundError:
             return
 
+################################################################################################
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -593,6 +601,8 @@ class Events(commands.Cog, name="Events"):
         # Logs are disabled...
         else:
             return
+
+################################################################################################
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
