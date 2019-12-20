@@ -413,8 +413,28 @@ class Music(commands.Cog, name="Music"):
                          'delete:606282780183232550': 'Delete_Page',
                          'paginator_info:609172845880279062': 'Info_Page'}
 
+        self._last_command_channel = None
+
         if not hasattr(bot, 'wavelink'):
             self.bot.wavelink = wavelink.Client(bot)
+
+    @commands.Cog.listener()
+    async def on_command_completion(self, ctx):
+        if ctx.command.cog != ctx.cog:
+            return
+
+        self._last_command_channel = ctx.channel.id
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        if before.channel is not None and after.channel is None:
+            if member.guild.me in before.channel.members:
+                if len(before.channel.members) == 1:
+                    channel = member.guild.get_channel(self._last_command_channel)
+                    await channel.send("Everyone left the channel, I will stop playing music.")
+
+                    player = self.bot.wavelink.get_player(member.guild.id, cls=Player)
+                    await player.destroy()
 
 
     async def initiate_nodes(self):

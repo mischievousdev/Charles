@@ -95,17 +95,21 @@ class Events(commands.Cog, name="Events"):
             logemb.add_field(name="__Error:__", value=error)
             await errorlog.send(embed=logemb)
 
-            erroremb=discord.Embed(description="<:warn:620414236010741783> **Command Error:** Invalid code!\n\nLooks like the code from this command is broken, please [join the support server](https://discord.gg/wZSH7pz) and report this issue!", color=0xFF7070)
-            await ctx.send(embed=erroremb)
+            errormsg=discord.Embed(color=0xFF7070)
+            errormsg.add_field(name="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_ic_title"),
+                               value=get_text(ctx.guild, "events", "events.oce_ic"))
+            await ctx.send(embed=errormsg)
 
         elif isinstance(err, errors.MissingPermissions):
             errormsg=discord.Embed(color=0xFF7070)
-            errormsg.add_field(name="<:warn:620414236010741783> **Permissions Error:** Insufficient permissions!", value="You do not have the permissions to ececute this command.")
+            errormsg.add_field(name="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_no_title"),
+                               value=get_text(ctx.guild, "events", "events.oce_user_no_perms"))
             await ctx.send(embed=errormsg)
 
         elif isinstance(err, errors.BotMissingPermissions):
             errormsg=discord.Embed(color=0xFF7070)
-            errormsg.add_field(name="<:warn:620414236010741783> **Permissions Error:** Insufficient permissions!", value=f"I am missing permissions to run this command: {err}")
+            errormsg.add_field(name="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_no_title"),
+                               value=get_text(ctx.guild, "events", "events.oce_bot_no_perms") + f"\n\n{err}")
             await ctx.send(embed=errormsg)
 
         elif isinstance(err, errors.CommandOnCooldown):
@@ -132,8 +136,8 @@ class Events(commands.Cog, name="Events"):
 
         elif isinstance(err.original, discord.Forbidden):
             errormsg=discord.Embed(color=0xFF7070)
-            errormsg.add_field(name="<:warn:620414236010741783> **Permissions Error:** Insufficient permissions!",
-                               value="You do not have the permissions to execute this command.")
+            errormsg.add_field(name="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_no_title"),
+                               value=get_text(ctx.guild, "events", "events.oce_user_no_perms"))
             await ctx.send(embed=errormsg)
 
 
