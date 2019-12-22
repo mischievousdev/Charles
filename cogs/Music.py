@@ -549,6 +549,9 @@ class Music(commands.Cog, name="Music"):
             if ctx.author.voice.channel == ctx.guild.me.voice.channel:
                 return
 
+        if not player.dj:
+            player.dj = ctx.author
+
         e = discord.Embed(color=self.bot.embed_color)
         ch = f"<:voice:585783907673440266>`{channel.name}`" 
         e.description=f"<:headphone:607011176106295327> " + get_text(ctx.guild, 'music', 'music.connected').format(ch)
@@ -1443,7 +1446,7 @@ class Music(commands.Cog, name="Music"):
         with open(f'db/Playlists/{ctx.author.id}.json', "w") as f:
             json.dump(data, f, indent=4)
 
-        await ctx.send(f"Succesfully shuffled playlist `{playlist}`!")
+        await ctx.send(get_text(ctx.guild, 'music', 'music.pl.shuffled').format(playlist))
 
 def setup(bot):
     bot.add_cog(Music(bot))

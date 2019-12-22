@@ -134,7 +134,7 @@ class utility(commands.Cog, name="Utility"):
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel
 
-        await ctx.send("Do you want to use an existing message or do you want me to make a new one? `new` | `existing`")
+        await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.msg_Q'))
 
         msg_opt = False
         check1 = False
@@ -142,39 +142,39 @@ class utility(commands.Cog, name="Utility"):
             try:
                 msg = await self.bot.wait_for('message', check=check, timeout=60)
 
-                if msg.content.lower() == "new":
-                    await ctx.send("Ok, I'll make a new one!", delete_after=5)
+                if msg.content.lower() == get_text(ctx.guild, 'utility', 'utility.rr.new'):
+                    await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.new_ok'), delete_after=5)
                     msg_opt = True
                     check1 = True
-                elif msg.content.lower() == "existing":
-                    await ctx.send("Alright, let's use an existing message.", delete_after=5)
+                elif msg.content.lower() == get_text(ctx.guild, 'utility', 'utility.rr.existing'):
+                    await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.existing_ok'), delete_after=5)
                     check1 = True
                 else:
-                    await ctx.send("Invalid option given, please try again.", delete_after=5)
+                    await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.invalid_opt'), delete_after=5)
 
             except asyncio.TimeoutError:
-                return await ctx.send("Timed out, cancelling command.")
+                return await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.timeout'))
 
         if msg_opt == True:
-            await ctx.send("Do you want it in an embed? `yes` | `no`\n\n*if you choose for embed, the roles will be mentions as they don't ping in an embed. In a normal message it will be the role name.*")
+            await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.embed_Q'))
 
             check2 = False
             while check2 != True:
                 try:
                     embed = await self.bot.wait_for('message', check=check, timeout=60)
 
-                    if embed.content.lower() == "yes":
-                        await ctx.send("Ok, great!", delete_after=5)
+                    if embed.content.lower() == get_text(ctx.guild, 'utility', 'utility.rr.yes'):
+                        await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.embed_ok'), delete_after=5)
                         embed_opt = True
                         check2 = True
-                    elif embed.content.lower() == "no":
-                        await ctx.send("Alright, normal message it is.", delete_after=5)
+                    elif embed.content.lower() == get_text(ctx.guild, 'utility', 'utility.rr.no'):
+                        await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.no_embed_ok'), delete_after=5)
                         check2 = True
                     else:
-                        await ctx.send("Invalid option given, please try again.", delete_after=5)
+                        await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.invalid_opt'), delete_after=5)
 
                 except asyncio.TimeoutError:
-                    return await ctx.send("Timed out, cancelling command.")
+                    return await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.timeout'))
         else:
             pass
 
@@ -190,17 +190,17 @@ class utility(commands.Cog, name="Utility"):
                 if len(emoji_dict) == 20:
                     done = True
                 else:
-                    await ctx.send(f"Please send **one** emoji you want to use! {addmsg}")
+                    await ctx.send(+ f" {addmsg}")
                     emoji_check = False
                     role_check = True
                     emoji_msg = await self.bot.wait_for('message', check=check, timeout=60)
 
-                if emoji_msg.content.lower() == "cancel" and len(emoji_dict) >= 1:
-                    await ctx.send("Alright, so that's all set up now.", delete_after=5)
+                if emoji_msg.content.lower() == get_text(ctx.guild, 'utility', 'utility.rr.cancel') and len(emoji_dict) >= 1:
+                    await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.cancel_ok'), delete_after=5)
                     done = True
 
                 if emoji_msg.content in emoji_dict.keys():
-                    await ctx.send("Already using that emoji for reaction roles in this message!", delete_after=5)
+                    await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.emoji_in_use'), delete_after=5)
                     emoji_check = True
 
 
@@ -208,51 +208,51 @@ class utility(commands.Cog, name="Utility"):
                     try:
                         emoji = await commands.EmojiConverter().convert(ctx, emoji_msg.content)
                         await emoji_msg.add_reaction(emoji)
-                        await ctx.send("Ok, let's use that emoji!", delete_after=5)
+                        await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.emoji_ok'), delete_after=5)
 
                         try:
-                            await ctx.send("Now please send the role name/mention/id for the role you want to set for that emoji.")
+                            await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.send_role'))
                             role_msg = await self.bot.wait_for('message', check=check, timeout=60)
 
                             role = await commands.RoleConverter().convert(ctx, role_msg.content)
 
                             if role.id in emoji_dict.values():
-                                await ctx.send("Already using that role for reaction roles in this message, please try again.", delete_after=5)
+                                await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.role_in_use'), delete_after=5)
                                 role_check = False
 
                             if role_check != False:
                                 if role.position >= ctx.guild.me.top_role.position:
-                                    await ctx.send("I could not set that as a reaction role. The position of that role is higher than or equal to my top role!", delete_after=5)
+                                    await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.role_pos_error'), delete_after=5)
                                 else:
-                                    await ctx.send(f"The role `{role.name}` has been set as reaction role for {str(emoji_msg.content)}")
+                                    await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.role_set').format(role.name, str(emoji)))
                                     emoji_dict[str(emoji)] = role.id
 
                                     if addmsg == "":
-                                        addmsg += "Say `cancel` if you're done"
+                                        addmsg += get_text(ctx.guild, 'utility', 'utility.rr.cancel_msg')
 
                         except asyncio.TimeoutError:
-                            return await ctx.send("Timed out, cancelling command.")
+                            return await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.timeout'))
 
                         except Exception:
-                            await ctx.send("I could not find that role. Restarting...", delete_after=5)
+                            await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.role_not_found'), delete_after=5)
 
                     except Exception:
-                        await ctx.send("I could not find that emoji, make sure I am in the same server this emoji is from!", delete_after=5)
+                        await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.emoji_not_found'), delete_after=5)
 
             except asyncio.TimeoutError:
-                return await ctx.send("Timed out, cancelling command.")
+                return await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.timeout'))
 
         total = ""
         for k, v in emoji_dict.items():
             total += f"{k} | <@&{v}>\n"
 
-        await ctx.send(content="Here's the result:", embed=discord.Embed(color=0x36393E, description=total))
+        await ctx.send(content=get_text(ctx.guild, 'utility', 'utility.rr.result'), embed=discord.Embed(color=0x36393E, description=total))
 
         await asyncio.sleep(2)
 
         if msg_opt == True:
 
-            await ctx.send("Please send the channel mention/ID/name where you want the message to be.")
+            await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.send_channel'))
             check3 = False
             while check3 != True:
                 try:
@@ -261,40 +261,40 @@ class utility(commands.Cog, name="Utility"):
                     
                     if channel != None:
                         if channel.permissions_for(ctx.guild.me).send_messages == True:
-                            await ctx.send(f"Alright, message will be sent to {channel.mention}!", delete_after=5)
+                            await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.channel_ok').format(channel.mention), delete_after=5)
                             check3 = True
                         else:
-                            await ctx.send("I do not have permissions to send messages in that channel.", delete_after=5)
+                            await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.no_send_perms'), delete_after=5)
                     else:
-                        await ctx.send("I could not find that channel.", delete_after=5)
+                        await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.channel_not_found'), delete_after=5)
 
                 except asyncio.TimeoutError:
-                    return await ctx.send("Timed out, cancelling command.")
+                    return await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.timeout'))
 
                 except Exception:
-                    await ctx.send("I could not find that channel, please try again.", delete_after=5)
+                    await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.channel_not_found'), delete_after=5)
 
             if embed_opt == True:
 
-                await ctx.send("If you want to set a custom title for the embed, please say it now. Say \"None\" to set it to the default title (\"Reaction Roles\").")
+                await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.embed_title'))
                 try:
                     title_msg = await self.bot.wait_for('message', check=check, timeout=60)
-                    if title_msg.content.lower() == "none":
-                        title = "Reaction Roles"
+                    if title_msg.content.lower() == get_text(ctx.guild, 'utility', 'utility.rr.none'):
+                        title = get_text(ctx.guild, 'utility', 'utility.rr.rr_title')
                     else:
                         title = title_msg.content
                 except asyncio.TimeoutError:
-                    return await ctx.send("Timed out, cancelling command.")
+                    return await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.timeout'))
 
                 e = discord.Embed(color=self.bot.embed_color, title=title)
-                e.set_footer(text="React with an emoji to get the corresponding role!")
+                e.set_footer(text=get_text(ctx.guild, 'utility', 'utility.rr.rr_desc'))
                 e.description = total
                 rrmsg = await channel.send(embed=e)
                 for k in emoji_dict.keys():
                     await rrmsg.add_reaction(k)
 
             elif embed_opt == False:
-                msg = "React with an emoji to get the corresponding role!\n\n"
+                msg = get_text(ctx.guild, 'utility', 'utility.rr.rr_desc') + "\n\n"
                 for k, v in emoji_dict.items():
                     msg += f"{k} | {ctx.guild.get_role(v).name}\n"
                 rrmsg = await channel.send(msg)
@@ -302,7 +302,7 @@ class utility(commands.Cog, name="Utility"):
                     await rrmsg.add_reaction(k)
 
         elif msg_opt == False:
-            await ctx.send("Please send the **channel ID/mention/name** of the channel the message is in you want to use for these reaction roles!")
+            await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.send_msg_channel'))
             check4 = False
             while check4 != True:
                 try:
@@ -310,18 +310,18 @@ class utility(commands.Cog, name="Utility"):
                     channel = await commands.TextChannelConverter().convert(ctx, chan_msg.content)
                     
                     if channel != None:
-                        await ctx.send(f"Alright, message will be fetched from {channel.mention}!", delete_after=5)
+                        await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.msg_channel_ok').format(channel.mention), delete_after=5)
                         check4 = True
                     else:
-                        await ctx.send("I could not find that channel.", delete_after=5)
+                        await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.channel_not_found'), delete_after=5)
 
                 except asyncio.TimeoutError:
-                    return await ctx.send("Timed out, cancelling command.")
+                    return await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.timeout'))
 
                 except Exception:
-                    await ctx.send("I could not find that channel, please try again.", delete_after=5)
+                    await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.channel_not_found'), delete_after=5)
 
-            await ctx.send("Now please send the **message ID** from the message you want to use for reaction roles!")
+            await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.send_msg_id'))
             check5 = False
             while check5 != True:
                 try:
@@ -330,23 +330,23 @@ class utility(commands.Cog, name="Utility"):
                     
                     if rrmsg != None:
                         if str(rrmsg.id) in d["RR"]:
-                            await ctx.send("I can not use that message for reaction roles as it already is being used for reaction roles!", delete_after=5)
+                            await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.msg_in_use'), delete_after=5)
                         else:
-                            await ctx.send(f"Alright, I will use that message for reaction roles!", delete_after=5)
+                            await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.msg_ok'), delete_after=5)
                             check5 = True
                     else:
-                        await ctx.send(f"I could not find that message in {channel.mention}...", delete_after=5)
+                        await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.msg_not_found_channel').format(channel.mention), delete_after=5)
 
                 except asyncio.TimeoutError:
-                    return await ctx.send("Timed out, cancelling command.")
+                    return await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.timeout'))
 
                 except Exception:
-                    await ctx.send("I could not find that message, please try again.", delete_after=5)
+                    await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.msg_not_found'), delete_after=5)
 
             for k in emoji_dict.keys():
                 await rrmsg.add_reaction(k)
 
-        await ctx.send("Everything has been set up, reaction roles are now set up!")
+        await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.complete'))
         d["RR"][str(rrmsg.id)] = emoji_dict
 
         with open(f'db/guilds/{ctx.guild.id}.json', 'w') as r:

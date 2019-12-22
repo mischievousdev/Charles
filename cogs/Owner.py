@@ -334,9 +334,10 @@ class Owner(commands.Cog, name="Owner", command_attrs=dict(hidden=True)):
     async def reboot(self, ctx):
         """ Reboot the bot """
         await ctx.message.add_reaction('a:Gears_Loading:470313276832743425')
-        embed=discord.Embed(title="Rebooting...", color=0xfdac2b, timestamp=datetime.datetime.utcnow())
-        channel = self.bot.get_channel(514959099235008513)
-        await channel.send(embed=embed)
+        #embed=discord.Embed(title="Rebooting...", color=0xfdac2b, timestamp=datetime.datetime.utcnow())
+        #channel = self.bot.get_channel(514959099235008513)
+        #await channel.send(embed=embed)
+        await self.bot.dblpy.close()
         await self.bot.bot_logout()
 
     @commandExtra(category="Messages")
