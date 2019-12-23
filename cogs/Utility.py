@@ -190,7 +190,7 @@ class utility(commands.Cog, name="Utility"):
                 if len(emoji_dict) == 20:
                     done = True
                 else:
-                    await ctx.send(+ f" {addmsg}")
+                    await ctx.send(get_text(ctx.guild, 'utility', 'utility.rr.send_emoji') + f" {addmsg}")
                     emoji_check = False
                     role_check = True
                     emoji_msg = await self.bot.wait_for('message', check=check, timeout=60)
