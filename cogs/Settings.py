@@ -1061,14 +1061,10 @@ class GuildSettings(commands.Cog, name="Settings"):
         lang_list += "Norwegian      | [12.02%]\n"
         lang_list += "English        | [100%]\n"
         lang_list += "Dutch          | [27.91%]\n"
-        #lang_list += "German         | [XXX]\n"
-        #lang_list += "Danish         | [XXX]\n"
-        #lang_list += "Italian        | [XXX]\n"
         lang_list += "French         | [16.27%]\n"
         lang_list += "Spanish        | [48.56%]\n"
         lang_list += "Vietnamese     | [52.56%]\n"
         lang_list += "Russian        | [9.74%]"
-        #lang_list += "Serbian        | [XXX]"
         lang_list += "```"
 
         e = discord.Embed(color=self.bot.embed_color)
@@ -1086,41 +1082,21 @@ class GuildSettings(commands.Cog, name="Settings"):
                         value=lang_list)
             return await ctx.send(embed=e)
 
-        if language.lower() == "norwegian":
-            option = "NO"
-
-        elif language.lower() == "dutch":
-            option = "NL"
-
-        elif language.lower() == "english":
-            option = "EN"
-
-        #elif language.lower() == "german":
-        #    option = "DE"
-
-        #elif language.lower() == "danish":
-        #    option = "DA"
-
-        #elif language.lower() == "italian":
-        #    option = "IT"
-
-        elif language.lower() == "french":
-            option = "FR"
-
-        elif language.lower() == "spanish":
-            option = "ES"
-
-        elif language.lower() == "vietnamese":
-            option = "VI"
-
-        elif language.lower() == "russian":
-            option = "RU"
+        lang_opt = {
+        "norwegian": "NO",
+        "dutch": "NL",
+        "english": "EN",
+        "french": "FR",
+        "spanish": "ES",
+        "vietnamese": "VI",
+        "russian": "RU"
+        }
 
         file_name= "db/guilds/" + str(ctx.guild.id) + ".json"
         with open(file_name, "r") as f:
             data = json.load(f)
 
-        data['Guild_Info']['Language'] = option
+        data['Guild_Info']['Language'] = lang_opt[language.lower()]
 
         with open(file_name, "w") as f:
             json.dump(data, f, indent=4)
