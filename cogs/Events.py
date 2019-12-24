@@ -342,7 +342,7 @@ class Events(commands.Cog, name="Events"):
             return
 
         # Check if user is blacklisted from our dms
-        blacklisteddms = [514849447646199819, 514609909556314123]
+        blacklisteddms = [514849447646199819, 514609909556314123] # TODO: store in file and use command to (un)block people
         if not message.guild and message.author.id in blacklisteddms:
             blockeddm=discord.Embed(description="<:banhammer:523695899726053377> **BANNED!**", color=0xff1414)
             blockeddm.set_footer(text="You have been blocked from my dm's. If you want to appeal your ban, contact my owner! | Dutchy#6127")

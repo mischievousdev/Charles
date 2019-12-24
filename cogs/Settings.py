@@ -1058,27 +1058,32 @@ class GuildSettings(commands.Cog, name="Settings"):
         lang_list = "```ini\n"
         lang_list += f"{language_txt}{' '*int(15-len(language_txt))}| % {trans_txt}\n"
         lang_list += f"---------------+----{'-'*int(len(trans_txt))}\n"
-        lang_list += "Norwegian      | [16.41%]\n"
+        lang_list += "Norwegian      | [12.02%]\n"
         lang_list += "English        | [100%]\n"
-        lang_list += "Dutch          | [41.61%]\n"
+        lang_list += "Dutch          | [27.91%]\n"
         #lang_list += "German         | [XXX]\n"
         #lang_list += "Danish         | [XXX]\n"
         #lang_list += "Italian        | [XXX]\n"
-        lang_list += "French         | [24.78%]\n"
-        lang_list += "Spanish        | [69.99%]\n"
-        lang_list += "Vietnamese     | [75.44%]\n"
-        lang_list += "Russian        | [15.49%]"
+        lang_list += "French         | [16.27%]\n"
+        lang_list += "Spanish        | [48.56%]\n"
+        lang_list += "Vietnamese     | [52.56%]\n"
+        lang_list += "Russian        | [9.74%]"
         #lang_list += "Serbian        | [XXX]"
         lang_list += "```"
 
+        e = discord.Embed(color=self.bot.embed_color)
+        e.set_footer(text=get_text(ctx.guild, "settings", "settings.lang_help"))
 
-        if language is None or language.lower() not in languages:
-            e = discord.Embed(color=self.bot.embed_color,
-                              title=get_text(ctx.guild, "settings", "settings.invalid_lang"),
-                              description=get_text(ctx.guild, "settings", "settings.invalid_lang_desc"))
+        if language is None:
+            e.title=get_text(ctx.guild, "settings", "settings.lang_available")
+            e.description=lang_list
+            return await ctx.send(embed=e)
+
+        if language.lower() not in languages:
+            e.title=get_text(ctx.guild, "settings", "settings.invalid_lang")
+            e.description=get_text(ctx.guild, "settings", "settings.invalid_lang_desc")
             e.add_field(name=get_text(ctx.guild, "settings", "settings.lang_available"),
                         value=lang_list)
-            e.set_footer(text=get_text(ctx.guild, "settings", "settings.lang_help"))
             return await ctx.send(embed=e)
 
         if language.lower() == "norwegian":
