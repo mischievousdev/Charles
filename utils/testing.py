@@ -3,6 +3,7 @@ import datetime
 import os
 import struct
 from PIL import Image
+from io import BytesIO
 
 def changePNGColor(sourceFile, fromRgb, toRgb, deltaRank = 10):
     fromRgb = fromRgb.replace('#', '')
@@ -23,7 +24,12 @@ def changePNGColor(sourceFile, fromRgb, toRgb, deltaRank = 10):
             if abs(rdelta) <= deltaRank and abs(gdelta) <= deltaRank and abs(bdelta) <= deltaRank:
                 pixdata[x, y] = (toColor[0] + rdelta, toColor[1] + gdelta, toColor[2] + bdelta, pixdata[x, y][3])
 
-    img.save(os.path.dirname(sourceFile) + os.sep + f"{toRgb}" + os.path.splitext(sourceFile)[1])
+    buf = BytesIO()
+    img.save(buf, "png")
+    buf.seek(0)
+
+    return buf
+
 
 def create_embed(title=None, title_url=None, author_avatar=None, author_name=None, author_url=None, description=None, image=None, thumbnail=None, footer_text=None, footer_icon=None, timestamp=None):
 

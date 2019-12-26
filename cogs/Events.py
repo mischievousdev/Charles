@@ -130,7 +130,15 @@ class Events(commands.Cog, name="Events"):
             await ctx.send(embed=cdem)
 
             logchan = self.bot.get_channel(530458521125257217)
-            await logchan.send(f"{ctx.author} attempted to use a command while on cooldown.\n\nMake this message fancy someday soon mkay?")
+            logemb = discord.Embed(color=0xf89a16, title="**Cooldown Warning!**")
+            logemb.set_thumbnail(url="https://cdn.discordapp.com/emojis/522948753368416277.gif")
+            desc  = f"**User:** {ctx.author}\n"
+            desc += f"**⤷ ID:** {ctx.author.id}\n\n"
+            desc += f"**Channel:** #{ctx.channel.name}\n"
+            desc += f"**⤷ ID:** {ctx.channel.id}\n\n"
+            desc += f"There are **{retry_after} seconds** left on the cooldown."
+            logemb.description = desc
+            await logchan.send(embed=logemb)
 
         elif isinstance(err, errors.CommandNotFound):
             pass

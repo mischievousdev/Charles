@@ -378,25 +378,24 @@ class utility(commands.Cog, name="Utility"):
 
         embed.add_field(name="Hex", value=f"#{color}")
 
-        changePNGColor("db/images/circle.png", "#FFFFFF", f"#{color}")
+        img = changePNGColor("db/images/circle.png", "#FFFFFF", f"#{color}")
 
         lv = len(color)
         rgb_color = tuple(int(color[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
         embed.add_field(name="RGB", value=rgb_color, inline=False)
 
-        f = discord.File(f"db/images/{color}.png", filename="image.png")
+        f = discord.File(img, filename="image.png")
         embed.set_thumbnail(url="attachment://image.png")
         info_cmd = f"{ctx.prefix}colorinfo #{color}"
         embed.set_footer(text=get_text(ctx.guild, "utility", "utility.random_col").format(str(info_cmd)))
 
         await ctx.send(file=f, embed=embed)
-        os.remove(f"db/images/{color}.png")
 
     @commandExtra(category="Colors")
     async def colorinfo(self, ctx, color):
         color = color.strip('#')
 
-        changePNGColor("db/images/normal-circle.png", "#FFFFFF", f"#{color}")
+        img = changePNGColor("db/images/normal-circle.png", "#FFFFFF", f"#{color}")
 
         embed=discord.Embed()
 
@@ -412,7 +411,7 @@ class utility(commands.Cog, name="Utility"):
                 cmyk = f"({res['cmyk']['c']}, {res['cmyk']['m']}, {res['cmyk']['y']}, {res['cmyk']['k']})"
                 xyz = f"({res['XYZ']['X']}, {res['XYZ']['Y']}, {res['XYZ']['Z']})"
 
-        f = discord.File(f"db/images/{color}.png", filename="image.png")
+        f = discord.File(img, filename="image.png")
         embed.set_thumbnail(url="attachment://image.png")
 
         embed.title = name
@@ -425,7 +424,6 @@ class utility(commands.Cog, name="Utility"):
         embed.add_field(name="XYZ", value=xyz)
 
         await ctx.send(embed=embed, file=f)
-        os.remove(f"db/images/{color}.png")
 
     @commands.is_nsfw()
     @commandExtra(category="Utility") 
