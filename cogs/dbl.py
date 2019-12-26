@@ -19,15 +19,19 @@ class DiscordBotsOrgAPI(commands.Cog, name="DBL"):
 
     @commands.Cog.listener()
     async def on_dbl_test(self, data):
-        c = await self.bot.fetch_channel(381963689470984203)
-        await c.send(data)
+        c = await self.bot.fetch_channel(659606634321936417)
+        await c.send("A vote test has ran succesfully!")
 
     @commands.Cog.listener()
     async def on_dbl_vote(self, data):
-        print(data)
-        channel = await self.bot.fetch_channel(562784997962940476)
+        channel = await self.bot.fetch_channel(659606634321936417)
         user = await self.bot.fetch_user(int(data['user']))
-        await channel.send(f"{str(user)} has voted!")
+        e = discord.Embed(color=0x5E82AC,
+                          title="Received Upvote!",
+                          description=f"New upvote received from **{user}**!")
+        e.set_author(icon_url=user.avatar_url, name=str(user))
+        e.set_thumbnail(url="https://cdn.discordapp.com/attachments/638902095520464908/659611283443941376/upvote.png")
+        await channel.send(embed=e)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -36,11 +40,6 @@ class DiscordBotsOrgAPI(commands.Cog, name="DBL"):
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         await self.bot.dblpy.post_guild_count()
-
-    @commands.Cog.listener()
-    async def on_guild_post(self):
-        channel = await self.bot.fetch_channel(562784997962940476)
-        await channel.send("Guild count posted to DBL.")
 
 def setup(bot):
     bot.add_cog(DiscordBotsOrgAPI(bot))
