@@ -380,6 +380,9 @@ class Events(commands.Cog, name="Events"):
             msgembed.set_author(name=message.author, icon_url=message.author.avatar_url)
             msgembed.add_field(name="Mention Info:", value=f"From server: {message.author.guild}\nServer ID: {message.author.guild.id}\n\nSent by: {message.author.name}\nUser ID: {message.author.id}\n\nSent in: #{message.channel.name}")
             msgembed.set_footer(text=f"Channel ID: {message.channel.id}")
+            if message.attachments:
+                attachment_url = message.attachments[0].url
+                msgembed.set_image(url=attachment_url)
             return await mentionlog.send(embed=msgembed)
 
 ################################################################################################

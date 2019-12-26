@@ -54,7 +54,7 @@ BOT_EXTENSIONS = [
     'cogs.Test',
     'cogs.Images',
     'cogs.Ytt',
-    'cogs.topgg'
+    'cogs.dbl'
 ]
 
 print('[CONNECT] Logging in...')

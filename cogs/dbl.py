@@ -19,7 +19,8 @@ class DiscordBotsOrgAPI(commands.Cog, name="DBL"):
 
     @commands.Cog.listener()
     async def on_dbl_test(self, data):
-        print(data)
+        c = await self.bot.fetch_channel(381963689470984203)
+        await c.send(data)
 
     @commands.Cog.listener()
     async def on_dbl_vote(self, data):

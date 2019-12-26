@@ -25,8 +25,6 @@ class TopGG(commands.Cog):
                 return web.Response()
             else:
                 return web.Response(status=401)
-            c = await self.bot.fetch_channel(381963689470984203)
-            await c.send("{} just voted/tested.".format(request['user']))
 
         app = web.Application(loop=self.bot.loop)
         app.router.add_post(self.webhook_path, vote_handler)
@@ -34,6 +32,11 @@ class TopGG(commands.Cog):
         await runner.setup()
         self._webserver = web.TCPSite(runner, '0.0.0.0', self.webhook_port)
         await self._webserver.start()
+
+    @commands.Cog.listener()
+    async def on_dbl_test(self, data):
+        c = await self.bot.fetch_channel(381963689470984203)
+        await c.send(data)
 
 def setup(bot):
     bot.add_cog(TopGG(bot))

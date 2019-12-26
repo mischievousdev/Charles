@@ -217,7 +217,7 @@ class moderation(commands.Cog, name="Moderation"):
         except discord.Forbidden as e:
             return await ctx.send(get_text(ctx.guild, "moderation", "moderation.purge.no_perm"))
         except discord.HTTPException as e:
-            return await ctx.send(get_text(ctx.guild, "moderation", "moderation.purge.error").format(e))
+            return await ctx.send(get_text(ctx.guild, "moderation", "moderation.error").format(e))
 
         spammers = Counter(m.author.display_name for m in deleted)
         deleted = len(deleted)
