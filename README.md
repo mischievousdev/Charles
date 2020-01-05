@@ -39,7 +39,3 @@ When picking the category, look at other commands in the cog and pick the existi
 
 Please click [**here**](https://discordapp.com/invite/wZSH7pz) if you would like to join the support server for any questions / issues you would like to talk about.
 
-## License
-
-This repository is unlicensed. Therefore you are **not** allowed to copy/share this code. **However** creating a pull request to this code  is allowed!
-
