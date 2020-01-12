@@ -11,6 +11,20 @@ from utils.translate import get_text
 from utils.default import commandsPlus, GroupPlus
 from db import tokens
 
+
+HANDLES = {  # replace these with your get_text stuff
+    commands.DisabledCommand: "events.oce_dc",
+    commands.BadUnionArgument: "events.oce_bua",
+    commands.BotMissingPermissions: "events.oce_bmp",
+    commands.CheckFailure: "events.oce_ce",
+    commands.MissingPermissions: "events.oce_mp",
+    commands.MissingRequiredArgument: "events.oce_mra",
+    commands.NotOwner: "events.oce_no",
+    commands.UserInputError: "events.oce_uie",
+    commands.TooManyArguments: "events.oce_tma",
+}
+
+
 class Events(commands.Cog, name="Events"):
     def __init__(self, bot):
         self.bot = bot
@@ -79,84 +93,75 @@ class Events(commands.Cog, name="Events"):
 ################################################################################################
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx, err):
-        if isinstance(err, errors.MissingRequiredArgument):
-            await ctx.send_help(ctx.command)
+    async def on_command_error(self, ctx, exc):
+        if ctx.cog and commands.Cog._get_overridden_method(ctx.cog.cog_command_error):
+            return  # comment this out if you want the handler to fire regardless of cog handlers
 
-        elif isinstance(err, errors.BadArgument):
-            await ctx.send_help(ctx.command)
+        if hasattr(ctx.command, 'on_error'):
+            return  # comment this out if you want the handler to fire regardless of command handlers
 
-        elif isinstance(err, errors.CommandInvokeError):
-            err = err.original
+        if isinstance(exc, commands.CommandInvokeError):
+            ctx.command.reset_cooldown(ctx)
+            exc = exc.original
 
-            _traceback = traceback.format_tb(err.__traceback__)
-            _traceback = ''.join(_traceback)
-            error = ('```sh\n{2}{0}: {3}\n```').format(type(err).__name__, ctx.message.content, _traceback, err)
+        if isinstance(exc, (commands.CommandNotFound, commands.NoPrivateMessage)):
+            return
 
-            errorlog = self.bot.get_channel(522855838881284100)
-            logemb=discord.Embed(title="Coding Error", color=0xFF7070)
-            if ctx.command.parent:
-                cmd = f"{ctx.command.parent} {ctx.command.name}"
-            else:
-                cmd = ctx.command.name
-            logemb.add_field(name="Server Info", value=f"**Server:** {ctx.guild.name}\n**Server ID:** {ctx.guild.id}\n**Channel:** {ctx.channel.name}\n**Channel ID:** {ctx.channel.id}")
-            logemb.add_field(name="Command Info", value=f"**Invoked by:** {ctx.author}\n**Author ID:** {ctx.author.id}\n**Command:** {cmd}\n**Prefix:** {ctx.prefix}")
-            logemb.add_field(name="Full command message", value=ctx.message.clean_content)
-            logemb.add_field(name="__**Error:**__", value=error)
-            await errorlog.send(embed=logemb)
+        if isinstance(exc, commands.CommandOnCooldown):
+            embed = discord.Embed(colour=discord.Colour.gold())
+            embed.title = '<a:timing:522948753368416277> ' + get_text(ctx.guild, 'events', 'events.oce_coc_title')
+            embed.description = get_text(ctx.guild, 'events', 'events.oce_coc_help').format(f'{exc.retry_after:.0f}')
+            await ctx.send(embed=embed)
 
-            errormsg=discord.Embed(color=0xFF7070,
-                                   title="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_ic_title"),
-                                   description=get_text(ctx.guild, "events", "events.oce_ic").format(type(err).__name__, err))
-            await ctx.send(embed=errormsg)
+            log = self.bot.get_channel(530458521125257217)
+            embed = discord.Embed(colour=discord.Colour.gold())
+            embed.title = "**Cooldown Bucket Expired**"
+            embed.set_thumbnail(url='https://cdn.discordapp.com/emojis/522948753368416277.gif')
+            embed.description = f"""**User:** {ctx.author}
+**⤷ ID:** {ctx.author.id}
 
-        elif isinstance(err, errors.MissingPermissions):
-            errormsg=discord.Embed(color=0xFF7070,
-                                   title="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_no_title"),
-                                   description=get_text(ctx.guild, "events", "events.oce_user_no_perms"))
-            await ctx.send(embed=errormsg)
+**Channel:** {ctx.channel}
+**⤷ ID:** {ctx.channel.id}
 
-        elif isinstance(err, errors.BotMissingPermissions):
-            errormsg=discord.Embed(color=0xFF7070,
-                                   title="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_no_title"),
-                                   description=get_text(ctx.guild, "events", "events.oce_bot_no_perms") + f"\n\n{err}")
-            await ctx.send(embed=errormsg)
+Cooldown resets in **{exc.retry_after:.0f}** seconds."""
+            await log.send(embed=embed)
+            return
 
-        elif isinstance(err, errors.CommandOnCooldown):
-            retry_after = f"{err.retry_after:.0f}"
-            cdem=discord.Embed(color=0xf89a16,
-                               title="<a:timing:522948753368416277> " + get_text(ctx.guild, "events", "events.oce_coc_title"),
-                               description=get_text(ctx.guild, "events", "events.oce_coc_help").format(str(retry_after)))
-            await ctx.send(embed=cdem)
+        ctx.command.reset_cooldown(ctx)
 
-            logchan = self.bot.get_channel(530458521125257217)
-            logemb = discord.Embed(color=0xf89a16, title="**Cooldown Warning!**")
-            logemb.set_thumbnail(url="https://cdn.discordapp.com/emojis/522948753368416277.gif")
-            desc  = f"**User:** {ctx.author}\n"
-            desc += f"**⤷ ID:** {ctx.author.id}\n\n"
-            desc += f"**Channel:** #{ctx.channel.name}\n"
-            desc += f"**⤷ ID:** {ctx.channel.id}\n\n"
-            desc += f"There are **{retry_after} seconds** left on the cooldown."
-            logemb.description = desc
-            await logchan.send(embed=logemb)
+        if isinstance(exc, commands.BadArgument):
+            cleaned = discord.utils.escape_mentions(str(exc))
+            # you might need to create a new translation thing for some of these
+            await ctx.send(get_text(ctx.guild, 'events', 'events.***').format(cleaned))
+            return
 
-        elif isinstance(err, errors.CommandNotFound):
-            pass
+        if isinstance(exc, commands.TooManyArguments):
+            if isinstance(ctx.command, commands.Group):
+                return
 
-        elif isinstance(err, errors.NotOwner):
-            errormsg=discord.Embed(color=0xFF7070,
-                                   title="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_no_title"),
-                                   description=get_text(ctx.guild, "events", "events.oce_no_help"))
-            await ctx.send(embed=errormsg)
+        msg = HANDLES.get(type(exc), None)
+        if not msg:
+            tb = traceback.format_exception(type(exc), exc, exc.__traceback__)
 
-        elif isinstance(err, errors.CheckFailure):
-            pass
+            embed = discord.Embed(colour=discord.Colour.red())
+            embed.title = '<:warn:620414236010741783> ' + get_text(
+                ctx.guild, 'events', 'events.oce_ic_title')
+            embed.description = get_text(ctx.guild, 'events', 'events.oc_ic').format(type(exc).__name__, exc)
+            await ctx.send(embed=embed)
 
-        elif isinstance(err.original, discord.Forbidden):
-            errormsg=discord.Embed(color=0xFF7070,
-                                   title="<:warn:620414236010741783> " + get_text(ctx.guild, "events", "events.oce_no_title"),
-                                   description=get_text(ctx.guild, "events", "events.oce_user_no_perms"))
-            await ctx.send(embed=errormsg)
+            log = self.bot.get_channel(522855838881284100)
+            embed = discord.Embed(title="Error occured during command execution.")
+            embed.description = f'''```py
+{tb}
+```'''
+            embed.add_field(name='Info', value=f'''`{ctx.message.clean_content}`
+Server: **{ctx.guild}** ({ctx.guild.id})
+Channel: **{ctx.channel}** ({ctx.channel.id})
+Author: **{ctx.author}** ({ctx.author.id})
+''')
+            await log.send(embed=embed)
+            return
+        await ctx.send(get_text(ctx.guild, 'events', msg))
 
 ################################################################################################
 
