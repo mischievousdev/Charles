@@ -2,7 +2,7 @@
 
 <img align="right" src="https://i.imgur.com/XzG1LMK.png" width="40%">
 
-![Discord.py Version](https://img.shields.io/badge/discord.py-1.2.5-blue?style=flat-square)
+![Discord.py Version](https://img.shields.io/badge/discord.py-1.3.1-blue?style=flat-square)
 ![Python Versions](https://img.shields.io/badge/python-3.6%20%7C%203.7-blue?style=flat-square)
 
 Charles is a Discord Bot built in Python. It is a very customizable bot.
